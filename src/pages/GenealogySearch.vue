@@ -194,7 +194,8 @@ onMounted(() => {
             <el-radio :label="'2'">无索引</el-radio>
           </el-radio-group>
           <div class="w16p"></div>
-          <el-button class="w16p" type="primary" @click="handleSearch">检索</el-button>
+          <!-- <el-button class="w16p" type="primary" @click="handleSearch">检索</el-button> -->
+          <div class="GlitterBtn w16p" @click="handleSearch">检索</div>
         </div>
       </section>
       <!-- tab -->

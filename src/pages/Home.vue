@@ -10,10 +10,6 @@ const global = useGlobalStore();
 const {  } = storeToRefs(global);
 const { saveProperyValue } = global;
 
-defineProps({
-  msg: String,
-});
-
 const surname = ref('');
 
 const goRouter = () => {

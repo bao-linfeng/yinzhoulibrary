@@ -82,3 +82,27 @@ i{
   background:#fdf6ec;
   color: #e6a23c;
 }
+/* 流光按钮 */
+.GlitterBtn{
+  width: 120px;
+  height: 30px;
+  line-height: 30px;
+  text-align: center;
+  font-size: 16px;
+  background: linear-gradient(90deg, #03a9f4, #f441a5, #ffeb3b, #03a9f4);
+  color: #fff;
+  border-radius: 15px;
+  background-size: 300%;
+  cursor: pointer;
+  user-select: none;
+}
+.GlitterBtn:hover{
+  box-shadow: 0 0 10px 0 #03a9f4;
+  animation: sun 2s linear infinite;
+}
+
+@keyframes sun{
+  100%{
+    background-position: -300% 0;
+  }
+}
