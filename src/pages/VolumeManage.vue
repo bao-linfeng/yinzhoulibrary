@@ -21,11 +21,10 @@ const getDataList = async () => {
     background: 'rgba(0, 0, 0, 0.7)',
   });
   tableData.value = [];
-  const result = await catalog.getCatalogList({
+  const result = await catalog.searchGC({
+    'token': token.value,
     'gcKey': gcKey.value,
     'volumeKey': volumeKey.value,
-    'siteKey': '1379194999',
-    'userRole': '3',
     'page': page.value,
     'limit': limit.value,
   });

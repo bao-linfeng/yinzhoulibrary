@@ -4,11 +4,13 @@ import { useRoute, useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useGlobalStore } from '../store/global.js';
 import { setValue, createMsg } from '../util/ADS.js';
+import { catalog } from '../util/api';
+import { ElLoading } from 'element-plus';
 
 const router = useRouter();
 
 const global = useGlobalStore();
-const { userInfo, pathActive, orgMemberInfo } = storeToRefs(global);
+const { userInfo, pathActive, orgMemberInfo, token } = storeToRefs(global);
 const { saveProperyValue } = global;
 
 const props = defineProps({
@@ -19,14 +21,77 @@ const goRouter = (data) => {
     router.push(data);
 }
 
+const createSingleGC = async () => {
+  const loading = ElLoading.service({
+    lock: true,
+    text: 'Loading',
+    background: 'rgba(0, 0, 0, 0.7)',
+  });
+  const result = await catalog.createSingleGC({
+    'token': token.value,
+    'genealogyName': form.value.genealogyName,
+    'surname': form.value.surname,
+    'hall': form.value.hall,
+    'publish': form.value.publish,
+    'authors': form.value.authors,
+    'place': form.value.place,
+    'LocalityModern': form.value.LocalityModern,
+    'version': form.value.version,
+    'volume': form.value.volume,
+    'memo': form.value.memo,
+    'explain': form.value.explain,
+  });
+  loading.close();
+  if(result.statusCode == 200){
+    createMsg('新建谱目成功!', true);
+    close(true);
+  }else{
+    createMsg(result.msg);
+  }
+};
+
+const editSingleGC = async () => {
+  const loading = ElLoading.service({
+    lock: true,
+    text: 'Loading',
+    background: 'rgba(0, 0, 0, 0.7)',
+  });
+  const result = await catalog.editSingleGC({
+    'token': token.value,
+    'gcKey': dataKey.value,
+    'patchData': {
+        'genealogyName': form.value.genealogyName,
+        'surname': form.value.surname,
+        'hall': form.value.hall,
+        'publish': form.value.publish,
+        'authors': form.value.authors,
+        'place': form.value.place,
+        'LocalityModern': form.value.LocalityModern,
+        'version': form.value.version,
+        'volume': form.value.volume,
+        'memo': form.value.memo,
+        'explain': form.value.explain,
+    },
+  });
+  loading.close();
+  if(result.statusCode == 200){
+    createMsg('编辑谱目成功!', true);
+    close(true);
+  }else{
+    createMsg(result.msg);
+  }
+};
+
 const dataKey = ref('');
 const form = ref({
     'genealogyName': '', 
     'surname': '',
     'hall': '',
     'publish': '',
-    'place': '',
     'authors': '',
+    'place': '',
+    'LocalityModern': '',
+    'version': '',
     'volume': '',
     'memo': '',
     'explain': '',
@@ -35,16 +100,15 @@ const form = ref({
 
 const handleSave = () => {
     if(dataKey.value){
-
+        editSingleGC();
     }else{
-        
+        createSingleGC();
     }
-    close();
 }
 
 const emit = defineEmits(['close', 'save']);
-const close = () => {
-    emit('close');
+const close = (f = false) => {
+    emit('close', f);
 }
 
 onMounted(() => {
@@ -55,8 +119,10 @@ onMounted(() => {
             'surname': props.dataRow.surname || '',
             'hall': props.dataRow.hall || '',
             'publish': props.dataRow.publish || '',
-            'place': props.dataRow.place || '',
             'authors': props.dataRow.authors || '',
+            'place': props.dataRow.place || '',
+            'LocalityModern': props.dataRow.LocalityModern || '',
+            'version': props.dataRow.version || '',
             'volume': props.dataRow.volume || '',
             'memo': props.dataRow.memo || '',
             'explain': props.dataRow.explain || '',
@@ -72,7 +138,7 @@ onMounted(() => {
             <h3 class="title">{{!dataKey ? '新建' : '编辑'}}</h3>
         </header>
         <main class="main marginT20">
-            <el-form :model="form" label-width="60px">
+            <el-form :model="form" label-width="90px">
                 <el-form-item label="谱名">
                     <el-input class="w200" type="text" v-model="form.genealogyName" placeholder="请输入谱名" />
                 </el-form-item>
@@ -85,20 +151,26 @@ onMounted(() => {
                 <el-form-item label="出版年">
                     <el-input class="w200" type="text" v-model="form.publish" placeholder="请输入出版年" />
                 </el-form-item>
+                <el-form-item label="作者">
+                    <el-input class="w200" type="text" v-model="form.authors" placeholder="请输入作者" />
+                </el-form-item>
                 <el-form-item label="谱籍地">
                     <el-input class="w200" type="text" v-model="form.place" placeholder="请输入谱籍地" />
                 </el-form-item>
-                <el-form-item label="作者">
-                    <el-input class="w200" type="text" v-model="form.authors" placeholder="请输入作者" />
+                <el-form-item label="现代谱籍地">
+                    <el-input class="w200" type="text" v-model="form.LocalityModern" placeholder="请输入现代谱籍地" />
+                </el-form-item>
+                <el-form-item label="版本类型">
+                    <el-input class="w200" type="text" v-model="form.version" placeholder="请输入版本类型" />
                 </el-form-item>
                 <el-form-item label="总卷数">
                     <el-input class="w200" type="text" v-model="form.volume" placeholder="请输入总卷数" />
                 </el-form-item>
                 <el-form-item label="备注">
-                    <el-input class="w200" type="text" v-model="form.memo" placeholder="请输入备注" />
+                    <el-input class="w200" type="textarea" :rows="3" v-model="form.memo" placeholder="请输入备注" />
                 </el-form-item>
                 <el-form-item label="说明">
-                    <el-input class="w200" type="text" v-model="form.explain" placeholder="请输入说明" />
+                    <el-input class="w200" type="textarea" :rows="3" v-model="form.explain" placeholder="请输入说明" />
                 </el-form-item>
                 <el-form-item v-if="!dataKey">
                     <el-checkbox v-model="form.isCreateVolume" label="按总卷册数自动生成卷册列表" />
@@ -118,7 +190,7 @@ onMounted(() => {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    padding: 50px;
+    padding: 20px 50px;
     box-shadow: 0 0 1px 2px #ddd;
     border-radius: 10px;
     z-index: 10000;

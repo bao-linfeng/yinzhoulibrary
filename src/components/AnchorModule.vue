@@ -48,8 +48,8 @@ onMounted(() => {
     <aside class="aside">
         <header class="header">
             <img class="logo" @click="goHome" src="/128.png" alt="">
-            <span class="name">{{userInfo.userName}}</span>
-            <p class="role">管理员</p>
+            <span class="name">{{userInfo.account}}</span>
+            <p class="role">{{userInfo.right == 1 ? '管理员' : userInfo.right == 2 ? '编辑' : '成员'}}</p>
         </header>
         <nav class="nav">
             <a :class="'router level'+(item.level)+(pathActive.indexOf(item.route) > -1 ? ' active' : '')" v-show="item.show" v-for="(item, index) in asideList" :key="index" @click="goRouter(item)">

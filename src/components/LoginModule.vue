@@ -4,6 +4,8 @@ import { useRoute, useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useGlobalStore } from '../store/global.js';
 import { setValue, createMsg } from '../util/ADS.js';
+import { catalog, login } from '../util/api';
+import { ElLoading } from 'element-plus';
 
 const router = useRouter();
 
@@ -15,18 +17,56 @@ const goRouter = (data) => {
     router.push(data);
 }
 
-const form = ref({'userName': '', 'password': ''});
+const loginByPassword = async () => {
+  const loading = ElLoading.service({
+    lock: true,
+    text: 'Loading',
+    background: 'rgba(0, 0, 0, 0.7)',
+  });
+  const result = await login.loginByPassword({
+    'account': form.value.account,
+    'password': form.value.password,
+  });
+  loading.close();
+  if(result.statusCode == 200){
+    saveProperyValue({'label': 'token', 'value': result.data.token}, true);
+    saveProperyValue({'label': 'userInfo', 'value': result.data}, 'dep');
+    close();
+  }else{
+    createMsg(result.msg);
+  }
+};
+
+const setPassword = async () => {
+  const loading = ElLoading.service({
+    lock: true,
+    text: 'Loading',
+    background: 'rgba(0, 0, 0, 0.7)',
+  });
+  const result = await login.setPassword({
+    'account': form.value.account,
+    'oldPassword': form.value.password,
+    'newPassword': form.value.password,
+  });
+  loading.close();
+  if(result.status == 200){
+    
+  }else{
+    createMsg(result.msg);
+  }
+};
+
+const form = ref({'account': 'admin_yinzhoulibrary00001', 'password': 'nbyz@)@#'});
 
 const handleLogin = () => {
-    if(!form.value.userName){
+    if(!form.value.account){
         return createMsg('账号必填！');
     }
     if(!form.value.password){
         return createMsg('密码必填！');
     }
-    saveProperyValue({'label': 'token', 'value': 'zxcvbnm'}, true);
-    saveProperyValue({'label': 'userInfo', 'value': {'userName': 'adai', 'role': '1'}}, 'dep');
-    close();
+
+    loginByPassword();
 }
 
 const emit = defineEmits(['close', 'save']);
@@ -48,7 +88,7 @@ onMounted(() => {
         <main class="main marginT20">
             <el-form :model="form">
                 <el-form-item label="账号">
-                    <el-input class="w200" type="text" v-model="form.userName" placeholder="请输入账号" />
+                    <el-input class="w200" type="text" v-model="form.account" placeholder="请输入账号" />
                 </el-form-item>
                 <el-form-item label="密码">
                     <el-input class="w200" type="password" v-model="form.password" placeholder="请输入密码" />

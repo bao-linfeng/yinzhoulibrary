@@ -110,7 +110,7 @@ const changeProperty = (p, v) =>{
 onMounted(() => {
   h.value = window.innerHeight - 60 - 50 - 20 - 164 - 20 - 30;
   surname.value = getQueryVariable('surname') ? decodeURIComponent(getQueryVariable('surname')) : '';
-  handleSearch();
+  // handleSearch();
 });
 
 </script>

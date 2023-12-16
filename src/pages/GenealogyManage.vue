@@ -20,13 +20,16 @@ const getDataList = async () => {
     background: 'rgba(0, 0, 0, 0.7)',
   });
   tableData.value = [];
-  const result = await catalog.getCatalogList({
+  const result = await catalog.searchGC({
+    'token': token.value,
     'gcKey': gcKey.value,
     'genealogyName': genealogyName.value,
     'surname': surname.value,
     'hall': hall.value,
-    'siteKey': '1379194999',
-    'userRole': '3',
+    'publish': publish.value,
+    'authors': authors.value,
+    'place': place.value,
+    'LocalityModern': LocalityModern.value,
     'page': page.value,
     'limit': limit.value,
   });
@@ -39,9 +42,24 @@ const getDataList = async () => {
   }
 };
 
-defineProps({
-  msg: String,
-});
+const deleteSingleGC = async (gcKey) => {
+  const loading = ElLoading.service({
+    lock: true,
+    text: 'Loading',
+    background: 'rgba(0, 0, 0, 0.7)',
+  });
+  const result = await catalog.deleteSingleGC({
+    'token': token.value,
+    'gcKey': gcKey,
+  });
+  loading.close();
+  if(result.statusCode == 200){
+    createMsg('删除谱目成功!', true);
+    getDataList();
+  }else{
+    createMsg(result.msg);
+  }
+};
 
 const gcKey = ref('');
 const genealogyName = ref('');
@@ -50,9 +68,7 @@ const hall = ref('');
 const publish = ref('');
 const authors = ref('');
 const place = ref('');
-const keyWord = ref('');
-const hasImage = ref(2);
-const hasIndex = ref(2);
+const LocalityModern = ref('');
 const page = ref(1);
 const limit = ref(30);
 const total = ref(0);
@@ -71,7 +87,7 @@ const handleClickAction = (row, t) => {
     dataRow.value = row;
   }
   if(t === 'delete'){
-    
+    deleteSingleGC(row._key);
   }
   if(t === 'add'){
     dataRow.value = row;
@@ -96,6 +112,9 @@ const handleCurrentChange = (data) => {
 const dataRow = ref('');
 const isShow = ref('');
 const handleClose = (data) => {
+  if(data){
+    handleSearch();
+  }
   isShow.value = '';
 }
 

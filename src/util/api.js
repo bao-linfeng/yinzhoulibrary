@@ -1,10 +1,5 @@
 import axios from 'axios';
-// import { createMsg } from './ADS';
-import { useRoute, useRouter } from 'vue-router';
-
-// const router = useRouter();
-
-let baseURL = 'https://pumudata.qingtime.cn';
+let baseURL = 'https://nbyzdata.qingtime.cn';
 
 axios.interceptors.response.use(
   (response) => {
@@ -101,9 +96,31 @@ const catalog = {
   getImageDetail(param) {
     return request.get('/catalog/image/detail', param);
   },
+  createSingleGC(param) {// 单谱创建
+    return request.post('/catalog/createSingleGC', param);
+  },
+  editSingleGC(param) {// 单谱创建
+    return request.patch('/catalog/editSingleGC', param);
+  },
+  deleteSingleGC(param) {// 单谱删除
+    return request.delete('/catalog/deleteSingleGC', param);
+  },
+  searchGC(param) {// 谱检索
+    return request.get('/catalog/searchGC', param);
+  },
+};
+
+const login = {
+  loginByPassword(param) {// 登录
+    return request.get('/loginByPassword', param);
+  },
+  setPassword(param) {// 设置新密码
+    return request.patch('/setPassword', param);
+  },
 };
 
 export { 
   catalog,
+  login,
   baseURL, 
 };

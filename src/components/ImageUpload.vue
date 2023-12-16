@@ -41,7 +41,7 @@ const close = () => {
 
 let i = 0, l = 100, files = [];
 const handleInputChange = (e) => {
-    console.log(e.target.files);
+    // console.log(e.target.files);
     files = Array.from(e.target.files);
     l = files.length;
     e.target.value = '';
