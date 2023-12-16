@@ -42,7 +42,7 @@ const createSingleGC = async () => {
     'explain': form.value.explain,
   });
   loading.close();
-  if(result.statusCode == 200){
+  if(result.status == 200){
     createMsg('新建谱目成功!', true);
     close(true);
   }else{
@@ -74,7 +74,7 @@ const editSingleGC = async () => {
     },
   });
   loading.close();
-  if(result.statusCode == 200){
+  if(result.status == 200){
     createMsg('编辑谱目成功!', true);
     close(true);
   }else{

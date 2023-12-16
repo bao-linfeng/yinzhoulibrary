@@ -20,7 +20,7 @@ const getDataList = async () => {
     background: 'rgba(0, 0, 0, 0.7)',
   });
   tableData.value = [];
-  const result = await catalog.getCatalogList({
+  const result = await catalog.searchGCFrontEnd({
     'gcKey': gcKey.value,
     'genealogyName': genealogyName.value,
     'surname': surname.value,
@@ -31,8 +31,6 @@ const getDataList = async () => {
     'keyWord': keyWord.value,
     'hasImage': hasImage.value,
     'hasIndex': hasIndex.value,
-    'siteKey': '1379194999',
-    'userRole': '3',
     'page': page.value,
     'limit': limit.value,
   });
@@ -45,9 +43,34 @@ const getDataList = async () => {
   }
 };
 
-defineProps({
-  msg: String,
-});
+const GCResolverFrontEnd = async () => {
+  const loading = ElLoading.service({
+    lock: true,
+    text: 'Loading',
+    background: 'rgba(0, 0, 0, 0.7)',
+  });
+  const result = await catalog.GCResolverFrontEnd({
+    'gcKey': gcKey.value,
+    'genealogyName': genealogyName.value,
+    'surname': surname.value,
+    'hall': hall.value,
+    'publish': publish.value,
+    'authors': authors.value,
+    'place': place.value,
+    'keyWord': keyWord.value,
+    'hasImage': hasImage.value,
+    'hasIndex': hasIndex.value,
+  });
+  loading.close();
+  if(result.status == 200){
+    listAuthors.value = result.data.listAuthors;
+    listHall.value = result.data.listHall;
+    listPlace.value = result.data.listPlace;
+    listSurname.value = result.data.listSurname;
+  }else{
+    createMsg(result.msg);
+  }
+};
 
 const gcKey = ref('');
 const genealogyName = ref('');
@@ -57,8 +80,8 @@ const publish = ref('');
 const authors = ref('');
 const place = ref('');
 const keyWord = ref('');
-const hasImage = ref(2);
-const hasIndex = ref(2);
+const hasImage = ref('');
+const hasIndex = ref('');
 const page = ref(1);
 const limit = ref(30);
 const total = ref(0);
@@ -67,6 +90,7 @@ const h = ref(200);
 const handleSearch = () => {
     page.value = 1;
     getDataList();
+    GCResolverFrontEnd();
 }
 
 const handleClickAction = (row, t) => {
@@ -98,10 +122,37 @@ const listPlace = ref([]);
 const listHall = ref([]);
 const listAuthors = ref([]);
 const changeProperty = (p, v) =>{
-  if(this[p] === v){
-      this[p] = '';
-  }else{
-      this[p] = v;
+  console.log(p, v);
+  if(p === 'surname'){
+    if(surname.value === v){
+      surname.value = '';
+    }else{
+      surname.value = v;
+    }
+  }
+
+  if(p === 'place'){
+    if(place.value === v){
+      place.value = '';
+    }else{
+      place.value = v;
+    }
+  }
+
+  if(p === 'hall'){
+    if(hall.value === v){
+      hall.value = '';
+    }else{
+      hall.value = v;
+    }
+  }
+
+  if(p === 'authors'){
+    if(authors.value === v){
+      authors.value = '';
+    }else{
+      authors.value = v;
+    }
   }
   
   handleSearch();
@@ -110,7 +161,7 @@ const changeProperty = (p, v) =>{
 onMounted(() => {
   h.value = window.innerHeight - 60 - 50 - 20 - 164 - 20 - 30;
   surname.value = getQueryVariable('surname') ? decodeURIComponent(getQueryVariable('surname')) : '';
-  // handleSearch();
+  handleSearch();
 });
 
 </script>
@@ -134,13 +185,13 @@ onMounted(() => {
           <el-input v-model="keyWord" class="w16p" placeholder="全文内容检索" clearable />
           <el-radio-group class="w16p" v-model="hasImage">
             <el-radio :label="''">全部影像</el-radio>
-            <el-radio :label="1">有影像</el-radio>
-            <el-radio :label="2">无影像</el-radio>
+            <el-radio :label="'1'">有影像</el-radio>
+            <el-radio :label="'2'">无影像</el-radio>
           </el-radio-group>
           <el-radio-group class="w16p" v-model="hasIndex">
             <el-radio :label="''">全部索引</el-radio>
-            <el-radio :label="1">有索引</el-radio>
-            <el-radio :label="2">无索引</el-radio>
+            <el-radio :label="'1'">有索引</el-radio>
+            <el-radio :label="'2'">无索引</el-radio>
           </el-radio-group>
           <div class="w16p"></div>
           <el-button class="w16p" type="primary" @click="handleSearch">检索</el-button>
@@ -165,7 +216,7 @@ onMounted(() => {
             <div class="box">
               <h3 class="title">姓氏</h3>
               <ul class="list-wrap style1">
-                  <li class="li" :class="{active: surname == item.surname}" v-for="(item, index) in listSurname" :key="index" @click="changeSurname(item)">{{item.surname}}({{item.length}})</li>
+                  <li class="li" :class="{active: surname == item.surname}" v-for="(item, index) in listSurname" :key="index" @click="changeProperty('surname', item.surname)">{{item.surname}}({{item.length}})</li>
               </ul>
             </div>
             <div class="box">

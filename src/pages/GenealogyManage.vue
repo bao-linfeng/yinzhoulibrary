@@ -53,7 +53,7 @@ const deleteSingleGC = async (gcKey) => {
     'gcKey': gcKey,
   });
   loading.close();
-  if(result.statusCode == 200){
+  if(result.status == 200){
     createMsg('删除谱目成功!', true);
     getDataList();
   }else{

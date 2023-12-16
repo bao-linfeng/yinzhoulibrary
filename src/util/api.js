@@ -84,11 +84,14 @@ const request = {
 };
 
 const catalog = {
-  getCatalogList(param) {
-    return request.get('/catalog', param);
+  searchGCFrontEnd(param) {// 谱检索（前台无token）
+    return request.get('/catalog/searchGCFrontEnd', param);
   },
-  getCatalogDetail(param) {
-    return request.get('/data/detail', param);
+  GCResolverFrontEnd(param) {// 谱检索分辨器（前台无token）
+    return request.get('/catalog/GCResolverFrontEnd', param);
+  },
+  GCDetailFrontEnd(param) {// 谱目详情（前台无token）
+    return request.get('/catalog/GCDetailFrontEnd', param);
   },
   getImageList(param) {
     return request.get('/catalog/imageList', param);

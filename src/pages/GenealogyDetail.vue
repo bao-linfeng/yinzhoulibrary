@@ -22,8 +22,8 @@ const getDataDetail = async () => {
     text: 'Loading',
     background: 'rgba(0, 0, 0, 0.7)',
   });
-  const result = await catalog.getCatalogDetail({
-    'dataKey': dataKey.value,
+  const result = await catalog.GCDetailFrontEnd({
+    'gcKey': dataKey.value,
   });
   loading.close();
   if(result.status == 200){
@@ -36,9 +36,8 @@ const getDataDetail = async () => {
 const dataKey = ref('');
 const detail = ref({});
 const field_main = ref([
-  {'fieldMeans': '文件标题', 'fieldName': 'fileName'},
   {'fieldMeans': '谱ID', 'fieldName': '_key'},
-  {'fieldMeans': '谱名', 'fieldName': 'genealogyName'},
+  // {'fieldMeans': '谱名', 'fieldName': 'genealogyName'},
   {'fieldMeans': '姓氏', 'fieldName': 'surname'},
   {'fieldMeans': '出版年', 'fieldName': 'publish'},
   {'fieldMeans': '堂号', 'fieldName': 'hall'},
@@ -47,17 +46,12 @@ const field_main = ref([
   {'fieldMeans': '谱籍地(现代)', 'fieldName': 'place'},
   {'fieldMeans': '谱籍地(原谱)', 'fieldName': 'LocalityModern'},
   {'fieldMeans': '总卷数', 'fieldName': 'volume'},
+  {'fieldMeans': '页数', 'fieldName': 'page'},
   {'fieldMeans': '缺卷说明', 'fieldName': 'lostVolume'},
-  {'fieldMeans': '可拍册数', 'fieldName': 'hasVolume'},
-  {'fieldMeans': '实拍册数', 'fieldName': 'volumeNumber'},
-  {'fieldMeans': '通过册数', 'fieldName': 'passVolumeNumber'},
-  {'fieldMeans': '认领状态', 'fieldName': 'takeStatus'},
+  // {'fieldMeans': '可拍册数', 'fieldName': 'hasVolume'},
   {'fieldMeans': '作者', 'fieldName': 'authors'},
   {'fieldMeans': '作者职务', 'fieldName': 'authorJob'},
   {'fieldMeans': '版本类型', 'fieldName': 'version'},
-  {'fieldMeans': '重复谱ID', 'fieldName': 'Dupbookid'},
-  {'fieldMeans': '谱籍地(现代)2', 'fieldName': 'place2'},
-  {'fieldMeans': '谱籍地(现代)3', 'fieldName': 'place3'},
 ]);
 
 const handleView = () => {
