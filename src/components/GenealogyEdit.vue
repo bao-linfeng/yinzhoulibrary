@@ -33,13 +33,17 @@ const createSingleGC = async () => {
     'surname': form.value.surname,
     'hall': form.value.hall,
     'publish': form.value.publish,
+    'publishAD': form.value.publishAD,
     'authors': form.value.authors,
+    'authorJob': form.value.authorJob,
     'place': form.value.place,
     'LocalityModern': form.value.LocalityModern,
     'version': form.value.version,
     'volume': form.value.volume,
+    'hasVolume': form.value.hasVolume,
     'memo': form.value.memo,
     'explain': form.value.explain,
+    'isCreateVolume': form.value.isCreateVolume ? 1 : 0,
   });
   loading.close();
   if(result.status == 200){
@@ -64,11 +68,14 @@ const editSingleGC = async () => {
         'surname': form.value.surname,
         'hall': form.value.hall,
         'publish': form.value.publish,
+        'publishAD': form.value.publishAD,
         'authors': form.value.authors,
+        'authorJob': form.value.authorJob,
         'place': form.value.place,
         'LocalityModern': form.value.LocalityModern,
         'version': form.value.version,
         'volume': form.value.volume,
+        'hasVolume': form.value.hasVolume,
         'memo': form.value.memo,
         'explain': form.value.explain,
     },
@@ -88,11 +95,14 @@ const form = ref({
     'surname': '',
     'hall': '',
     'publish': '',
+    'publishAD': '',
     'authors': '',
+    'authorJob': '',
     'place': '',
     'LocalityModern': '',
     'version': '',
     'volume': '',
+    'hasVolume': '',
     'memo': '',
     'explain': '',
     'isCreateVolume': ''
@@ -119,11 +129,14 @@ onMounted(() => {
             'surname': props.dataRow.surname || '',
             'hall': props.dataRow.hall || '',
             'publish': props.dataRow.publish || '',
+            'publishAD': props.dataRow.publishAD || '',
             'authors': props.dataRow.authors || '',
+            'authorJob': props.dataRow.authorJob || '',
             'place': props.dataRow.place || '',
             'LocalityModern': props.dataRow.LocalityModern || '',
             'version': props.dataRow.version || '',
             'volume': props.dataRow.volume || '',
+            'hasVolume': props.dataRow.hasVolume || '',
             'memo': props.dataRow.memo || '',
             'explain': props.dataRow.explain || '',
         }
@@ -151,8 +164,14 @@ onMounted(() => {
                 <el-form-item label="出版年">
                     <el-input class="w200" type="text" v-model="form.publish" placeholder="请输入出版年" />
                 </el-form-item>
+                <el-form-item label="公元年">
+                    <el-input class="w200" type="text" v-model="form.publishAD" placeholder="请输入公元年" />
+                </el-form-item>
                 <el-form-item label="作者">
                     <el-input class="w200" type="text" v-model="form.authors" placeholder="请输入作者" />
+                </el-form-item>
+                <el-form-item label="作者职务">
+                    <el-input class="w200" type="text" v-model="form.authorJob" placeholder="请输入作者职务" />
                 </el-form-item>
                 <el-form-item label="谱籍地">
                     <el-input class="w200" type="text" v-model="form.place" placeholder="请输入谱籍地" />
@@ -165,6 +184,9 @@ onMounted(() => {
                 </el-form-item>
                 <el-form-item label="总卷数">
                     <el-input class="w200" type="text" v-model="form.volume" placeholder="请输入总卷数" />
+                </el-form-item>
+                <el-form-item label="实拍册数">
+                    <el-input class="w200" type="text" v-model="form.hasVolume" placeholder="请输入实拍册数" />
                 </el-form-item>
                 <el-form-item label="备注">
                     <el-input class="w200" type="textarea" :rows="3" v-model="form.memo" placeholder="请输入备注" />

@@ -3,7 +3,7 @@ import { ref, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useGlobalStore } from '../store/global.js';
-import { catalog, baseURL } from '../util/api';
+import { catalog, baseURL, volume } from '../util/api';
 import { ElLoading } from 'element-plus';
 import { getQueryVariable, createMsg, initDownloadExcel } from '../util/ADS';
 import VolumeEdit from '../components/VolumeEdit.vue';
@@ -14,16 +14,17 @@ const global = useGlobalStore();
 const { userInfo, pathActive, orgMemberInfo, token } = storeToRefs(global);
 const { saveProperyValue } = global;
 
-const getDataList = async () => {
+const getVolumeList = async () => {
   const loading = ElLoading.service({
     lock: true,
     text: 'Loading',
     background: 'rgba(0, 0, 0, 0.7)',
   });
   tableData.value = [];
-  const result = await catalog.searchGC({
+  const result = await volume.getVolumeList({
     'token': token.value,
     'gcKey': gcKey.value,
+    'genealogyName': genealogyName.value,
     'volumeKey': volumeKey.value,
     'page': page.value,
     'limit': limit.value,
@@ -37,11 +38,31 @@ const getDataList = async () => {
   }
 };
 
+const deleteSingleVolume = async (vKey) => {
+  const loading = ElLoading.service({
+    lock: true,
+    text: 'Loading',
+    background: 'rgba(0, 0, 0, 0.7)',
+  });
+  const result = await volume.deleteSingleVolume({
+    'token': token.value,
+    'vKey': vKey,
+  });
+  loading.close();
+  if(result.status == 200){
+    createMsg('删除卷册成功!', true);
+    getVolumeList();
+  }else{
+    createMsg(result.msg);
+  }
+};
+
 const props = defineProps({
   msg: String,
 });
 
 const gcKey = ref('');
+const genealogyName = ref('');
 const volumeKey = ref('');
 const page = ref(1);
 const limit = ref(30);
@@ -50,7 +71,7 @@ const tableData = ref([]);
 const h = ref(200);
 const handleSearch = () => {
     page.value = 1;
-    getDataList();
+    getVolumeList();
 }
 
 const handleClickAction = (row, t) => {
@@ -62,7 +83,7 @@ const handleClickAction = (row, t) => {
     
   }
   if(t === 'delete'){
-    
+    deleteSingleVolume(row._key);
   }
   if(t === 'add'){
     
@@ -73,12 +94,16 @@ const handleClickAction = (row, t) => {
 
 const handleCurrentChange = (data) => {
     page.value = data;
-    getDataList();
+    getVolumeList();
 }
 
 const dataRow = ref('');
 const isShow = ref('');
 const handleClose = (data) => {
+  // console.log(data);
+  if(data){
+    handleSearch();
+  }
   isShow.value = '';
 }
 
@@ -107,6 +132,7 @@ onMounted(() => {
       <section class="search-wrap">
         <div class="search-box">
           <el-input v-model="gcKey" class="w150" placeholder="谱ID" clearable />
+          <el-input v-model="genealogyName" class="w150" placeholder="谱名" clearable />
           <el-input v-model="volumeKey" class="w150" placeholder="卷ID" clearable />
           <el-button type="primary" @click="handleSearch">检索</el-button>
         </div>
@@ -118,15 +144,14 @@ onMounted(() => {
         border 
         :height="h"
         style="width: 100%">
-        <el-table-column prop="_key" label="谱ID" width="120" align="center" />
+        <el-table-column prop="gcKey" label="谱ID" width="120" align="center" />
         <el-table-column prop="genealogyName" label="谱名" min-width="120" align="center" />
         <el-table-column prop="surname" label="姓氏" width="120" align="center" />
-
-        <el-table-column prop="volume" label="卷名" width="120" align="center" />
-        <el-table-column prop="volumeKey" label="卷ID" width="120" align="center" />
-        <el-table-column prop="pages" label="页码" width="120" align="center" />
-        <el-table-column prop="path" label="卷册路径" min-width="120" align="center" />
-        <el-table-column label="操作" fixed="right" width="150" align="center">
+        <el-table-column prop="_key" label="卷ID" width="120" align="center" />
+        <el-table-column prop="volumeNumber" label="卷名" width="120" align="center" />
+        <el-table-column prop="internalSerialNumber" label="卷序号" width="120" align="center" />
+        <el-table-column prop="images" label="页码" width="120" align="center" />
+        <el-table-column label="操作" fixed="right" width="250" align="center">
           <template #default="scope">
             <el-button size="small" type="primary" @click="handleClickAction(scope.row, 'linkImages')">关联影像</el-button>
             <el-button size="small" type="primary" @click="handleClickAction(scope.row, 'edit')">编辑</el-button>

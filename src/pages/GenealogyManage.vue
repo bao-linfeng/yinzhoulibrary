@@ -5,7 +5,7 @@ import { storeToRefs } from 'pinia';
 import { useGlobalStore } from '../store/global.js';
 import { catalog, baseURL } from '../util/api';
 import { ElLoading } from 'element-plus';
-import { getQueryVariable, createMsg, initDownloadExcel } from '../util/ADS';
+import { getQueryVariable, createMsg, initDownloadExcel, downliadLink } from '../util/ADS';
 import GenealogyEdit from '../components/GenealogyEdit.vue';
 
 const router = useRouter();
@@ -61,6 +61,28 @@ const deleteSingleGC = async (gcKey) => {
   }
 };
 
+const batchImportCatalog = async (filePath) => {
+  const loading = ElLoading.service({
+    lock: true,
+    text: 'Loading',
+    background: 'rgba(0, 0, 0, 0.7)',
+  });
+  const result = await catalog.batchImportCatalog({
+    'token': token.value,
+    'filePath': filePath,
+  });
+  loading.close();
+  if(result.status == 200){
+    createMsg('批量导入谱目成功!', true);
+    getDataList();
+  }else if(result.status == 301){
+    createMsg('批量导入谱目失败!');
+    downliadLink(result.result, baseURL+'/');
+  }else{
+    createMsg(result.msg);
+  }
+};
+
 const gcKey = ref('');
 const genealogyName = ref('');
 const surname = ref('');
@@ -84,23 +106,24 @@ const handleClickAction = (row, t) => {
     router.push('/VolumeManage?id='+row._key);
   }
   if(t === 'edit'){
-    dataRow.value = row;
+    
   }
   if(t === 'delete'){
     deleteSingleGC(row._key);
   }
   if(t === 'add'){
-    dataRow.value = row;
+    
   }
   if(t === 'template'){
     initDownloadExcel([
-      ['谱名', '姓氏', '出版年', '公元年', '堂号', '作者', '作者职务', '现代地名', '始迁祖', '先祖名人', '版本类型', '总卷数', '影像页', '说明', '馆藏地', '入库名'],
-      ['甬東包氏支譜', '包', '（清）光緒四年', '1878', '尊樂堂', '不详', '编纂', '浙江省,宁波市,鄞州区', '榮', '業，為一世祖。拯，字希仁，諡孝肅，宋朝人，龍圖閣大學士，為五世祖。', '刻本', '1', '289', '世系修錄至第三十五世', '鄞州圖書館', '7001'],
+      ['谱名', '姓氏', '出版年', '公元年', '堂号', '作者', '作者职务', '现代地名', '始迁祖', '先祖名人', '版本类型', '总卷数', '实拍册数', '影像页', '说明', '馆藏地', '入库名', '是否创建卷册'],
+      ['甬東包氏支譜', '包', '（清）光緒四年', '1878', '尊樂堂', '不详', '编纂', '浙江省,宁波市,鄞州区', '榮', '業，為一世祖。拯，字希仁，諡孝肅，宋朝人，龍圖閣大學士，為五世祖。', '刻本', '3卷', '3', '289', '世系修錄至第三十五世', '鄞州圖書館', '7001', '是'],
     ], '鄞州图书馆谱目表头');
   }
   if(t === 'batchLoad'){
     
   }
+  dataRow.value = row;
   isShow.value = t;
 }
 
@@ -118,8 +141,13 @@ const handleClose = (data) => {
   isShow.value = '';
 }
 
-const handleBatchUpdate = () => {
-
+const handleBatchUpdate = (response, uploadFile, uploadFiles) => {
+  if(response.statusCode == 200){
+    console.log(response);
+    batchImportCatalog(response.filePath);
+  }else{
+    createMsg(response.msg);
+  }
 }
 
 onMounted(() => {
@@ -175,7 +203,8 @@ onMounted(() => {
         <el-table-column prop="place" label="谱籍地" min-width="120" align="center" />
         <el-table-column prop="authors" label="作者" width="120" align="center" />
         <el-table-column prop="volume" label="总卷数" width="120" align="center" />
-        <el-table-column prop="pageNumber" label="影像页" width="120" align="center" />
+        <el-table-column prop="hasVolume" label="实拍册数" width="120" align="center" />
+        <el-table-column prop="images" label="影像页" width="120" align="center" />
         <el-table-column prop="explain" label="说明" width="120" align="center" />
         <el-table-column prop="memo" label="备注" width="120" align="center" />
         <el-table-column label="操作" fixed="right" width="150" align="center">

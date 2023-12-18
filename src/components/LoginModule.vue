@@ -28,7 +28,7 @@ const loginByPassword = async () => {
     'password': form.value.password,
   });
   loading.close();
-  if(result.statusCode == 200){
+  if(result.status == 200){
     saveProperyValue({'label': 'token', 'value': result.data.token}, true);
     saveProperyValue({'label': 'userInfo', 'value': result.data}, 'dep');
     close();

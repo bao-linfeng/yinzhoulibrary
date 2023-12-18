@@ -21,16 +21,16 @@ const getDataList = async () => {
   });
   tableData.value = [];
   const result = await catalog.searchGCFrontEnd({
-    'gcKey': gcKey.value,
-    'genealogyName': genealogyName.value,
-    'surname': surname.value,
-    'hall': hall.value,
-    'publish': publish.value,
-    'authors': authors.value,
-    'place': place.value,
-    'keyWord': keyWord.value,
-    'hasImage': hasImage.value,
-    'hasIndex': hasIndex.value,
+    'gcKey': SearchParameters.value.gcKey,
+    'genealogyName': SearchParameters.value.genealogyName,
+    'surname': SearchParameters.value.surname,
+    'hall': SearchParameters.value.hall,
+    'publish': SearchParameters.value.publish,
+    'authors': SearchParameters.value.authors,
+    'place': SearchParameters.value.place,
+    'keyWord': SearchParameters.value.keyWord,
+    'hasImage': SearchParameters.value.hasImage,
+    'hasIndex': SearchParameters.value.hasIndex,
     'page': page.value,
     'limit': limit.value,
   });
@@ -50,16 +50,16 @@ const GCResolverFrontEnd = async () => {
     background: 'rgba(0, 0, 0, 0.7)',
   });
   const result = await catalog.GCResolverFrontEnd({
-    'gcKey': gcKey.value,
-    'genealogyName': genealogyName.value,
-    'surname': surname.value,
-    'hall': hall.value,
-    'publish': publish.value,
-    'authors': authors.value,
-    'place': place.value,
-    'keyWord': keyWord.value,
-    'hasImage': hasImage.value,
-    'hasIndex': hasIndex.value,
+    'gcKey': SearchParameters.value.gcKey,
+    'genealogyName': SearchParameters.value.genealogyName,
+    'surname': SearchParameters.value.surname,
+    'hall': SearchParameters.value.hall,
+    'publish': SearchParameters.value.publish,
+    'authors': SearchParameters.value.authors,
+    'place': SearchParameters.value.place,
+    'keyWord': SearchParameters.value.keyWord,
+    'hasImage': SearchParameters.value.hasImage,
+    'hasIndex': SearchParameters.value.hasIndex,
   });
   loading.close();
   if(result.status == 200){
@@ -72,16 +72,18 @@ const GCResolverFrontEnd = async () => {
   }
 };
 
-const gcKey = ref('');
-const genealogyName = ref('');
-const surname = ref('');
-const hall = ref('');
-const publish = ref('');
-const authors = ref('');
-const place = ref('');
-const keyWord = ref('');
-const hasImage = ref('');
-const hasIndex = ref('');
+const SearchParameters = ref({
+  'gcKey': '',
+  'genealogyName': '',
+  'surname': '',
+  'hall': '',
+  'publish': '',
+  'authors': '',
+  'place': '',
+  'keyWord': '',
+  'hasImage': '',
+  'hasIndex': '',
+});
 const page = ref(1);
 const limit = ref(30);
 const total = ref(0);
@@ -123,36 +125,10 @@ const listHall = ref([]);
 const listAuthors = ref([]);
 const changeProperty = (p, v) =>{
   console.log(p, v);
-  if(p === 'surname'){
-    if(surname.value === v){
-      surname.value = '';
-    }else{
-      surname.value = v;
-    }
-  }
-
-  if(p === 'place'){
-    if(place.value === v){
-      place.value = '';
-    }else{
-      place.value = v;
-    }
-  }
-
-  if(p === 'hall'){
-    if(hall.value === v){
-      hall.value = '';
-    }else{
-      hall.value = v;
-    }
-  }
-
-  if(p === 'authors'){
-    if(authors.value === v){
-      authors.value = '';
-    }else{
-      authors.value = v;
-    }
+  if(SearchParameters.value[p] === v){
+    SearchParameters.value[p] = '';
+  }else{
+    SearchParameters.value[p] = v;
   }
   
   handleSearch();
@@ -160,7 +136,7 @@ const changeProperty = (p, v) =>{
 
 onMounted(() => {
   h.value = window.innerHeight - 60 - 50 - 20 - 164 - 20 - 30;
-  surname.value = getQueryVariable('surname') ? decodeURIComponent(getQueryVariable('surname')) : '';
+  SearchParameters.value.surname = getQueryVariable('surname') ? decodeURIComponent(getQueryVariable('surname')) : '';
   handleSearch();
 });
 
@@ -173,22 +149,22 @@ onMounted(() => {
       <!-- search -->
       <section class="search-wrap">
         <div class="search-box marginT20">
-          <el-input v-model="gcKey" class="w16p" placeholder="谱ID" clearable />
-          <el-input v-model="genealogyName" class="w16p" placeholder="谱名" clearable />
-          <el-input v-model="surname" class="w16p" placeholder="姓氏" clearable />
-          <el-input v-model="hall" class="w16p" placeholder="堂号" clearable />
-          <el-input v-model="publish" class="w16p" placeholder="出版年" clearable />
-          <el-input v-model="authors" class="w16p" placeholder="作者" clearable />
+          <el-input v-model="SearchParameters.gcKey" class="w16p" placeholder="谱ID" clearable />
+          <el-input v-model="SearchParameters.genealogyName" class="w16p" placeholder="谱名" clearable />
+          <el-input v-model="SearchParameters.surname" class="w16p" placeholder="姓氏" clearable />
+          <el-input v-model="SearchParameters.hall" class="w16p" placeholder="堂号" clearable />
+          <el-input v-model="SearchParameters.publish" class="w16p" placeholder="出版年" clearable />
+          <el-input v-model="SearchParameters.authors" class="w16p" placeholder="作者" clearable />
         </div>
         <div class="search-box marginT20">
-          <el-input v-model="place" class="w16p" placeholder="谱籍地" clearable />
-          <el-input v-model="keyWord" class="w16p" placeholder="全文内容检索" clearable />
-          <el-radio-group class="w16p" v-model="hasImage">
+          <el-input v-model="SearchParameters.place" class="w16p" placeholder="谱籍地" clearable />
+          <el-input v-model="SearchParameters.keyWord" class="w16p" placeholder="全文内容检索" clearable />
+          <el-radio-group class="w16p" v-model="SearchParameters.hasImage">
             <el-radio :label="''">全部影像</el-radio>
             <el-radio :label="'1'">有影像</el-radio>
             <el-radio :label="'2'">无影像</el-radio>
           </el-radio-group>
-          <el-radio-group class="w16p" v-model="hasIndex">
+          <el-radio-group class="w16p" v-model="SearchParameters.hasIndex">
             <el-radio :label="''">全部索引</el-radio>
             <el-radio :label="'1'">有索引</el-radio>
             <el-radio :label="'2'">无索引</el-radio>
@@ -217,25 +193,25 @@ onMounted(() => {
             <div class="box">
               <h3 class="title">姓氏</h3>
               <ul class="list-wrap style1">
-                  <li class="li" :class="{active: surname == item.surname}" v-for="(item, index) in listSurname" :key="index" @click="changeProperty('surname', item.surname)">{{item.surname}}({{item.length}})</li>
+                  <li class="li" :class="{active: SearchParameters.surname == item.surname}" v-for="(item, index) in listSurname" :key="index" @click="changeProperty('surname', item.surname)">{{item.surname}}({{item.length}})</li>
               </ul>
             </div>
             <div class="box">
               <h3 class="title">谱籍地</h3>
               <ul class="list-wrap style1">
-                  <li class="li" :class="{active: place == item.place}" v-for="(item, index) in listPlace" :key="index" @click="changeProperty('place', item.place)">{{item.place}}({{item.length}})</li>
+                  <li class="li" :class="{active: SearchParameters.place == item.place}" v-for="(item, index) in listPlace" :key="index" @click="changeProperty('place', item.place)">{{item.place}}({{item.length}})</li>
               </ul>
             </div>
             <div class="box">
               <h3 class="title">堂号</h3>
               <ul class="list-wrap style1">
-                  <li class="li" :class="{active: hall == item.hall}" v-for="(item, index) in listHall" :key="index" @click="changeProperty('hall', item.hall)">{{item.hall}}({{item.length}})</li>
+                  <li class="li" :class="{active: SearchParameters.hall == item.hall}" v-for="(item, index) in listHall" :key="index" @click="changeProperty('hall', item.hall)">{{item.hall}}({{item.length}})</li>
               </ul>
             </div>
             <div class="box">
               <h3 class="title">作者</h3>
               <ul class="list-wrap style1">
-                  <li class="li" :class="{active: authors == item.authors}" v-for="(item, index) in listAuthors" :key="index" @click="changeProperty('authors', item.authors)">{{item.authors}}({{item.length}})</li>
+                  <li class="li" :class="{active: SearchParameters.authors == item.authors}" v-for="(item, index) in listAuthors" :key="index" @click="changeProperty('authors', item.authors)">{{item.authors}}({{item.length}})</li>
               </ul>
             </div>
           </div>

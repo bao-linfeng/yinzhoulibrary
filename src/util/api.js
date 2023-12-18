@@ -111,6 +111,27 @@ const catalog = {
   searchGC(param) {// 谱检索
     return request.get('/catalog/searchGC', param);
   },
+  batchImportCatalog(param) {// 批量导入谱目
+    return request.post('/catalog/batchImportCatalog', param);
+  },
+  searchGenealogyName(param) {// 谱名模糊查询
+    return request.get('/catalog/searchGenealogyName', param);
+  },
+};
+
+const volume = {
+  createSingleVolume(param) {// 单卷册创建
+    return request.post('/volume/createSingleVolume', param);
+  },
+  getVolumeList(param) {// 卷册列表
+    return request.get('/volume/volumeList', param);
+  },
+  editSingleVolume(param) {// 单卷册编辑
+    return request.patch('/volume/editSingleVolume', param);
+  },
+  deleteSingleVolume(param) {// 单卷册删除
+    return request.delete('/volume/deleteSingleVolume', param);
+  },
 };
 
 const login = {
@@ -124,6 +145,7 @@ const login = {
 
 export { 
   catalog,
+  volume,
   login,
   baseURL, 
 };

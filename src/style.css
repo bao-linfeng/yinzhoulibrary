@@ -106,3 +106,20 @@ i{
     background-position: -300% 0;
   }
 }
+
+/* 滑动条美化 */
+.style1::-webkit-scrollbar-track{
+	border-radius: 2px;
+	background-color: transparent;
+}
+.style1::-webkit-scrollbar{
+	width: 4px;
+	background-color: transparent;
+}
+.style1::-webkit-scrollbar-thumb{
+	border-radius: 2px;
+	background: #888;
+}
+.style1::-webkit-scrollbar-corner{
+	background-color: transparent;
+}
