@@ -4,7 +4,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useGlobalStore } from '../store/global.js';
 import { setValue, createMsg } from '../util/ADS.js';
-import { catalog, baseURL, volume } from '../util/api';
+import { catalog, baseURL, volumeApi } from '../util/api';
 import { ElLoading } from 'element-plus';
 
 const router = useRouter();
@@ -72,7 +72,7 @@ const createSingleVolume = async () => {
     text: 'Loading',
     background: 'rgba(0, 0, 0, 0.7)',
   });
-  const result = await volume.createSingleVolume({
+  const result = await volumeApi.createSingleVolume({
     'token': token.value,
     'gcKey': gcKey.value,
     'volumeNumber': form.value.volumeNumber,
@@ -93,7 +93,7 @@ const editSingleVolume = async () => {
     text: 'Loading',
     background: 'rgba(0, 0, 0, 0.7)',
   });
-  const result = await volume.editSingleVolume({
+  const result = await volumeApi.editSingleVolume({
     'token': token.value,
     'vKey': dataKey.value,
     'patchData': {

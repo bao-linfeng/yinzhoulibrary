@@ -3,7 +3,7 @@ import { ref, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useGlobalStore } from '../store/global.js';
-import { catalog, baseURL, volume } from '../util/api';
+import { catalog, baseURL, volumeApi } from '../util/api';
 import { ElLoading } from 'element-plus';
 import { getQueryVariable, createMsg, initDownloadExcel } from '../util/ADS';
 import VolumeEdit from '../components/VolumeEdit.vue';
@@ -21,7 +21,7 @@ const getVolumeList = async () => {
     background: 'rgba(0, 0, 0, 0.7)',
   });
   tableData.value = [];
-  const result = await volume.getVolumeList({
+  const result = await volumeApi.getVolumeList({
     'token': token.value,
     'gcKey': gcKey.value,
     'genealogyName': genealogyName.value,
@@ -44,7 +44,7 @@ const deleteSingleVolume = async (vKey) => {
     text: 'Loading',
     background: 'rgba(0, 0, 0, 0.7)',
   });
-  const result = await volume.deleteSingleVolume({
+  const result = await volumeApi.deleteSingleVolume({
     'token': token.value,
     'vKey': vKey,
   });
@@ -112,7 +112,7 @@ const handleBatchUpdate = () => {
 }
 
 onMounted(() => {
-  h.value = window.innerHeight - 50 - 50 - 72 - 20;
+  h.value = window.innerHeight - 50 - 50 - 72 - 20 - 20;
   gcKey.value = getQueryVariable('id');
   handleSearch();
 });

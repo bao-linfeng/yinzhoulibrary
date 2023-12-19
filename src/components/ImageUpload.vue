@@ -4,11 +4,13 @@ import { useRoute, useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useGlobalStore } from '../store/global.js';
 import { setValue, createMsg } from '../util/ADS.js';
+import { catalog, baseURL, volumeApi, uploadApi, imageApi } from '../util/api';
+import { ElMessage, ElLoading } from 'element-plus';
 
 const router = useRouter();
 
 const global = useGlobalStore();
-const { userInfo, pathActive, orgMemberInfo } = storeToRefs(global);
+const { userInfo, pathActive, orgMemberInfo, token } = storeToRefs(global);
 const { saveProperyValue } = global;
 
 const props = defineProps({
@@ -21,8 +23,9 @@ const goRouter = (data) => {
 
 const dataKey = ref('');
 const form = ref({
-    'volume': '', 
-    'index': '',
+    'volumeNumber': '', 
+    'internalSerialNumber': '',
+    'gcKey': '',
 });
 
 const handleSave = () => {
@@ -39,36 +42,93 @@ const close = () => {
     emit('close');
 }
 
-let i = 0, l = 100, files = [];
+const uploadIndex = ref(0);
+const uploadLength = ref(0);
+let i = 0, l = 0, files = [];
 const handleInputChange = (e) => {
-    // console.log(e.target.files);
-    files = Array.from(e.target.files);
-    l = files.length;
+    files = Array.from(e.target.files).filter((ele) => {
+        return ele.name.indexOf('.jpg') > -1;
+    });
+    uploadLength.value = files.length;
     e.target.value = '';
 }
 
-function uploadImage(){
-    if(i < i){
-        // let fd = new FormData();
-        // fd.append('file', files[i]);
-
-        // uploadImageApi(fd);
-        // fd = null;
+function handleUploadImage(){
+    if(uploadIndex.value < uploadLength.value){
+        let fd = new FormData(), name = form.value.gcKey+'_'+form.value.internalSerialNumber+'_'+files[uploadIndex.value].name;
+        fd.append('file', new File([files[uploadIndex.value]], name));
+        // fd.append('gcKey', form.value.gcKey);
+        // fd.append('internalSerialNumber', form.value.internalSerialNumber);
+        // console.log(fd.get('file'));
+        uploadJPGOrXML(fd);
+        fd = null;
+        name = null;
     }else{
-
+        // uploadIndex.value = uploadIndex.value + 1;
+        files = [];
+        hasImage();
     }
 }
 
-const uploadImageApi = async (fd) =>{
-
+const uploadJPGOrXML = async (fd) =>{
+  const result = await uploadApi.uploadJPGOrXML(fd);
+  if(result.status == 200){
+    createImage(result.simplePath);
+  }else{
+    ElMessage({
+        message: result.msg,
+        type: 'warning',
+    });
+    uploadIndex.value = uploadIndex.value + 1;
+    handleUploadImage();
+  }
 }
+
+const createImage = async (simplePath) => {
+  const result = await imageApi.createImage({
+    'token': token.value,
+    'gcKey': form.value.gcKey,
+    'vKey': dataKey.value,
+    'simplePath': simplePath,
+  });
+  if(result.status == 200){
+    uploadIndex.value = uploadIndex.value + 1;
+    handleUploadImage();
+  }else{
+    ElMessage({
+        message: result.msg,
+        type: 'warning',
+    });
+    uploadIndex.value = uploadIndex.value + 1;
+    handleUploadImage();
+  }
+};
+
+const hasImage = async () => {
+  const result = await catalog.hasImage({
+    'token': token.value,
+    'gcKey': form.value.gcKey,
+  });
+  if(result.status == 200){
+    ElMessage({
+        message: '批量关联影像成功!',
+        type: 'success',
+    });
+  }else{
+    ElMessage({
+        message: result.msg,
+        type: 'warning',
+    });
+  }
+};
 
 onMounted(() => {
     dataKey.value = props.dataRow._key;
     if(dataKey.value){
         form.value = {
-            'volume': props.dataRow.volume || '卷1', 
-            'index': props.dataRow.index || '001',
+            'volumeNumber': props.dataRow.volumeNumber || '卷1', 
+            'internalSerialNumber': props.dataRow.internalSerialNumber || '001',
+            'gcKey': props.dataRow.gcKey || '',
         }
     }
 });
@@ -83,26 +143,26 @@ onMounted(() => {
         <main class="main marginT20">
             <el-form :model="form" label-width="60px">
                 <el-form-item label="卷名">
-                    <el-input class="w200" type="text" v-model="form.volume" :disabled="true" />
+                    <el-input class="w200" type="text" v-model="form.volumeNumber" :disabled="true" />
                 </el-form-item>
                 <el-form-item label="卷序号">
-                    <el-input class="w200" type="text" v-model="form.index" :disabled="true" />
+                    <el-input class="w200" type="text" v-model="form.internalSerialNumber" :disabled="true" />
                 </el-form-item>
                 <el-form-item label="文件夹">
                     <div class="upload-wrap">
                         <div class="upload-box">
-                            <input type="file" id="folderInput" @change="handleInputChange" directory webkitdirectory mozdirectory />
+                            <input type="file" id="folderInput" @change="handleInputChange" accept=".jpg" directory webkitdirectory mozdirectory />
                             <label for="folderInput" class="label">选择文件</label>
                         </div>
-                        <p class="btn marginL10" @click="uploadImage">上传</p>
+                        <p class="btn marginL10" @click="handleUploadImage">上传</p>
                     </div>
                 </el-form-item>
             </el-form>
         </main>
-        <div class="process-wrap">
+        <div class="process-wrap" v-if="uploadLength">
             <div class="process-box">
-                <i class="p"></i>
-                <i class="d">{{i}}/{{l}}</i>
+                <i class="p" :style="{width: (100*uploadIndex/uploadLength)+'%'}"></i>
+                <i class="d">{{uploadIndex}}/{{uploadLength}}</i>
             </div>
         </div>
         <footer class="footer marginT20">

@@ -1,5 +1,6 @@
 import axios from 'axios';
 let baseURL = 'https://nbyzdata.qingtime.cn';
+let uploadFileURL = '';
 
 axios.interceptors.response.use(
   (response) => {
@@ -93,12 +94,6 @@ const catalog = {
   GCDetailFrontEnd(param) {// 谱目详情（前台无token）
     return request.get('/catalog/GCDetailFrontEnd', param);
   },
-  getImageList(param) {
-    return request.get('/catalog/imageList', param);
-  },
-  getImageDetail(param) {
-    return request.get('/catalog/image/detail', param);
-  },
   createSingleGC(param) {// 单谱创建
     return request.post('/catalog/createSingleGC', param);
   },
@@ -117,9 +112,12 @@ const catalog = {
   searchGenealogyName(param) {// 谱名模糊查询
     return request.get('/catalog/searchGenealogyName', param);
   },
+  hasImage(param) {// 绑定是否有影像
+    return request.post('/catalog/hasImage', param);
+  },
 };
 
-const volume = {
+const volumeApi = {
   createSingleVolume(param) {// 单卷册创建
     return request.post('/volume/createSingleVolume', param);
   },
@@ -132,6 +130,9 @@ const volume = {
   deleteSingleVolume(param) {// 单卷册删除
     return request.delete('/volume/deleteSingleVolume', param);
   },
+  volumeListSingleGC(param) {// 卷册列表（单谱前台无token）
+    return request.get('/volume/volumeListSingleGC', param);
+  },
 };
 
 const login = {
@@ -143,9 +144,29 @@ const login = {
   },
 };
 
+const uploadApi = {
+  uploadJPGOrXML(param){// 上传文件
+		return request.post('/uploadJPGOrXML', param);
+	},
+};
+
+const imageApi = {
+  createImage(param){// 创建影像页记录
+		return request.post('/image/createImage', param);
+	},
+  getImageList(param) {// 卷册影像页key列表
+    return request.get('/image/volumeImageList', param);
+  },
+  getImageDetail(param) {// 影像页SimplePath
+    return request.get('/image/imageSimplePath', param);
+  },
+};
+
 export { 
   catalog,
-  volume,
+  volumeApi,
   login,
+  uploadApi,
+  imageApi,
   baseURL, 
 };

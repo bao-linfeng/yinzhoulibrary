@@ -100,10 +100,10 @@ const handleClickAction = (row, t) => {
         router.push('/GenealogyDetail?id='+row._key);
     }
     if(t === 'image'){
-      router.push('/ImageView?id='+row._key+'&volume=1&page=1');
+      router.push('/ImageView?id='+row._key+'&volumeKey='+row.firstVolumeKey+'&page=1');
     }
     if(t === 'text'){
-      router.push('/ImageView?id='+row._key+'&volume=1&page=1&isText=1');
+      router.push('/ImageView?id='+row._key+'&volumeKey='+row.firstVolumeKey+'&page=1&isText=1');
     }
 }
 
@@ -246,8 +246,8 @@ onMounted(() => {
             <el-table-column label="操作" fixed="right" width="150" align="center">
               <template #default="scope">
                 <el-button size="small" type="primary" @click="handleClickAction(scope.row, 'look')">查看</el-button>
-                <el-button size="small" type="primary" @click="handleClickAction(scope.row, 'image')">影像</el-button>
-                <el-button size="small" type="primary" @click="handleClickAction(scope.row, 'text')">全文</el-button>
+                <el-button v-if="scope.row.hasImage == 1" size="small" type="primary" @click="handleClickAction(scope.row, 'image')">影像</el-button>
+                <el-button v-if="scope.row.hasIndex == 1" size="small" type="primary" @click="handleClickAction(scope.row, 'text')">全文</el-button>
               </template>
             </el-table-column>
           </el-table>

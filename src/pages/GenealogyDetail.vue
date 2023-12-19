@@ -55,7 +55,7 @@ const field_main = ref([
 ]);
 
 const handleView = () => {
-  router.push('/ImageView?id='+dataKey.value+'&volume=1&page=1');
+  router.push('/ImageView?id='+dataKey.value+'&volumeKey='+detail.value.firstVolumeKey+'&page=1');
 }
 
 onMounted(() => {
@@ -75,7 +75,7 @@ onMounted(() => {
               <img class="cover" src="../assets/cover.png" />
               <p class="name">{{detail.genealogyName}}</p>
               <el-button v-if="detail.hasImage == 1" class="marginT20" type="primary" @click="handleView">查看影像</el-button>
-              <el-button v-if="detail.hasImage == 1" class="marginT20" type="primary" @click="handleView">查看全文</el-button>
+              <el-button v-if="detail.hasIndex == 1" class="marginT20" type="primary" @click="handleView">查看全文</el-button>
             </aside>
             <article class="article marginL20">
               <h3 class="title">{{detail.genealogyName}}</h3>

@@ -3,7 +3,7 @@ import { ref, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useGlobalStore } from '../store/global.js';
-import { catalog } from '../util/api';
+import { catalog, imageApi, volumeApi, baseURL } from '../util/api';
 import { getQueryVariable, createMsg } from '../util/ADS';
 import { ElLoading } from 'element-plus';
 
@@ -21,16 +21,12 @@ const getImageList = async () => {
     text: 'Loading',
     background: 'rgba(0, 0, 0, 0.7)',
   });
-  const result = await catalog.getImageList({
-    'catalogKey': dataKey.value,
-    'volume': '',
-    'siteKey': '1379194999',
-    'userRole': '3',
-    'userKey': '657446338',
+  const result = await imageApi.getImageList({
+    'vKey': volumeKey.value,
   });
   loading.close();
   if(result.status == 200){
-    imageList.value = result.result;
+    imageList.value = result.data;
     total.value = imageList.value.length;
     getImageDetail(imageList.value[page.value - 1]);
   }else{
@@ -38,20 +34,39 @@ const getImageList = async () => {
   }
 };
 
-const getImageDetail = async (imageKey) => {
+const getImageDetail = async (iKey) => {
   const loading = ElLoading.service({
     lock: true,
     text: 'Loading',
     background: 'rgba(0, 0, 0, 0.7)',
   });
-  const result = await catalog.getImageDetail({
-    'imageKey': imageKey,
-    'siteKey': '1379194999',
-    'userKey': '657446338',
+  const result = await imageApi.getImageDetail({
+    'iKey': iKey,
   });
   loading.close();
   if(result.status == 200){
-    imageDetail.value = result.result.image;
+    imageDetail.value = baseURL+'/nbyz'+result.data;
+  }else{
+    createMsg(result.msg);
+  }
+};
+
+const getVolumeList = async () => {
+  const loading = ElLoading.service({
+    lock: true,
+    text: 'Loading',
+    background: 'rgba(0, 0, 0, 0.7)',
+  });
+  const result = await volumeApi.volumeListSingleGC({
+    'gcKey': dataKey.value,
+  });
+  loading.close();
+  if(result.status == 200){
+    volumeList.value = result.data.map((ele) => {
+      ele.label = ele.volumeNumber+'('+ele.internalSerialNumber+')';
+      ele.value = ele._key;
+      return ele;
+    });
   }else{
     createMsg(result.msg);
   }
@@ -59,16 +74,12 @@ const getImageDetail = async (imageKey) => {
 
 const dataKey = ref('');
 const imageList = ref({});
-const volume = ref(1);
+const volumeKey = ref(1);
 const page = ref(1);
 const total = ref(100);
 const imageDetail = ref('');
 const isText = ref('');
-const volumeList = ref([
-  {'label': '卷1', 'value': '1'},
-  {'label': '卷2', 'value': '2'},
-  {'label': '卷3', 'value': '3'},
-]);
+const volumeList = ref([]);
 const handleView = () => {
   router.push('/ImageView?id='+dataKey.value);
 }
@@ -123,9 +134,10 @@ watch(page, (nv, ov) => {
 
 onMounted(() => {
     dataKey.value = getQueryVariable('id');
-    volume.value = getQueryVariable('volume');
+    volumeKey.value = getQueryVariable('volumeKey');
     page.value = Number(getQueryVariable('page'));
     isText.value = getQueryVariable('isText');
+    getVolumeList();
     getImageList();
 });
 
@@ -159,7 +171,7 @@ onMounted(() => {
       </article>
     </main>
     <footer class="footer">
-      <el-select v-model="volume" placeholder="卷册列表" class="w150">
+      <el-select v-model="volumeKey" placeholder="卷册列表" class="w150">
         <el-option
           v-for="(item,index) in volumeList"
           :key="index"
