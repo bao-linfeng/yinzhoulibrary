@@ -44,7 +44,7 @@ const field_main = ref([
   {'fieldMeans': '一世祖', 'fieldName': 'firstAncestor'},
   {'fieldMeans': '始迁祖', 'fieldName': 'migrationAncestor'},
   {'fieldMeans': '谱籍地(现代)', 'fieldName': 'place'},
-  {'fieldMeans': '谱籍地(原谱)', 'fieldName': 'LocalityModern'},
+  // {'fieldMeans': '谱籍地(原谱)', 'fieldName': 'LocalityModern'},
   {'fieldMeans': '总卷数', 'fieldName': 'volume'},
   {'fieldMeans': '页数', 'fieldName': 'page'},
   {'fieldMeans': '缺卷说明', 'fieldName': 'lostVolume'},

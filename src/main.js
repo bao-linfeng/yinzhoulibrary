@@ -17,6 +17,6 @@ app.config.errorHandler = (err, instance, info) => {
 //整个应用支持路由。
 app.use(router);
 app.use(pinia);
-app.use(ElementPlus, {});
+app.use(ElementPlus, {locale: ElementPlusLocaleZhCn});
 
 app.mount('#app');

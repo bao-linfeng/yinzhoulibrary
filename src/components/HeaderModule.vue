@@ -50,9 +50,9 @@ onMounted(() => {
 
 <style scoped lang="scss">
 .header{
-    height: 60px;
-    padding: 0 50px;
-    width: calc(100% - 100px);
+    height: 160px;
+    padding: 0 250px;
+    width: calc(100% - 500px);
     display: flex;
     justify-content: space-between;
     align-items: center;

@@ -128,8 +128,13 @@ const handleSearch = () => {
 }
 
 watch(page, (nv, ov) => {
-    console.log(nv);
-    getImageDetail(imageList.value[page.value - 1]);
+  console.log(nv);
+  getImageDetail(imageList.value[page.value - 1]);
+});
+
+watch(volumeKey, (nv, ov) => {
+  console.log(nv);
+  getImageList();
 });
 
 onMounted(() => {
@@ -138,7 +143,6 @@ onMounted(() => {
     page.value = Number(getQueryVariable('page'));
     isText.value = getQueryVariable('isText');
     getVolumeList();
-    getImageList();
 });
 
 </script>

@@ -135,7 +135,7 @@ const changeProperty = (p, v) =>{
 }
 
 onMounted(() => {
-  h.value = window.innerHeight - 60 - 50 - 20 - 164 - 20 - 30;
+  h.value = 900;
   SearchParameters.value.surname = getQueryVariable('surname') ? decodeURIComponent(getQueryVariable('surname')) : '';
   handleSearch();
 });
@@ -148,43 +148,101 @@ onMounted(() => {
     <main class="main">
       <!-- search -->
       <section class="search-wrap">
-        <div class="search-box marginT20">
-          <el-input v-model="SearchParameters.gcKey" class="w16p" placeholder="谱ID" clearable />
-          <el-input v-model="SearchParameters.genealogyName" class="w16p" placeholder="谱名" clearable />
-          <el-input v-model="SearchParameters.surname" class="w16p" placeholder="姓氏" clearable />
-          <el-input v-model="SearchParameters.hall" class="w16p" placeholder="堂号" clearable />
-          <el-input v-model="SearchParameters.publish" class="w16p" placeholder="出版年" clearable />
-          <el-input v-model="SearchParameters.authors" class="w16p" placeholder="作者" clearable />
+        <div class="search-box">
+          <!-- <el-input v-model="SearchParameters.gcKey" class="w16p" placeholder="谱ID" clearable /> -->
+          <el-input v-model="SearchParameters.surname" class="w20p" placeholder="请输入姓氏" clearable />
+          <el-input v-model="SearchParameters.genealogyName" class="w20p" placeholder="请输入谱名" clearable />
+          <el-input v-model="SearchParameters.place" class="w20p" placeholder="请输入谱籍地" clearable />
+          <el-input v-model="SearchParameters.hall" class="w20p" placeholder="请输入堂号" clearable />
+          <el-input v-model="SearchParameters.authors" class="w20p" placeholder="请输入作者" clearable />
         </div>
-        <div class="search-box marginT20">
-          <el-input v-model="SearchParameters.place" class="w16p" placeholder="谱籍地" clearable />
-          <el-input v-model="SearchParameters.keyWord" class="w16p" placeholder="全文内容检索" clearable />
-          <el-radio-group class="w16p" v-model="SearchParameters.hasImage">
+        <div class="search-box marginT30">
+          <el-input v-model="SearchParameters.publish" class="w20p" placeholder="请输入出版年" clearable />
+          <el-input v-model="SearchParameters.keyWord" class="w20p" placeholder="请输入全文关键字" clearable />
+          <el-radio-group class="w20p" v-model="SearchParameters.hasImage">
             <el-radio :label="''">全部影像</el-radio>
             <el-radio :label="'1'">有影像</el-radio>
             <el-radio :label="'2'">无影像</el-radio>
           </el-radio-group>
-          <el-radio-group class="w16p" v-model="SearchParameters.hasIndex">
+          <el-radio-group class="w20p" v-model="SearchParameters.hasIndex">
             <el-radio :label="''">全部索引</el-radio>
             <el-radio :label="'1'">有索引</el-radio>
             <el-radio :label="'2'">无索引</el-radio>
           </el-radio-group>
-          <div class="w16p"></div>
-          <!-- <el-button class="w16p" type="primary" @click="handleSearch">检索</el-button> -->
-          <div class="GlitterBtn w16p" @click="handleSearch">检索</div>
+          <el-button class="w20p" type="primary" @click="handleSearch">检索</el-button>
         </div>
       </section>
       <!-- tab -->
       <section class="tab-section">
-        <h3 class="title">找到{{total}}部家谱</h3>
+        <h3 class="title">发现 {{total}} 部家谱</h3>
         <ul class="tab-ul">
           <li :class="{active: tab === item.value}" v-for="(item, index) in tabList" :key="index" @click="tab = item.value">{{item.label}}</li>
         </ul>
       </section>
       <!-- data -->
       <section class="data-section">
+        <!-- 谱目列表 -->
+        <article class="article">
+          <div class="scroll-wrap">
+              <img class="left" src="../assets/scrollLeft.png" alt="">
+              <img class="right" src="../assets/scrollRight.png" alt="">
+          </div>
+          <el-table 
+            v-if="tab === 0"
+            ref="jiapu"
+            :data="tableData"  
+            :height="h"
+            style="width: 100%">
+            <el-table-column prop="_key" label="谱ID" width="120" align="center" />
+            <el-table-column prop="genealogyName" label="谱名" min-width="120" align="center" />
+            <el-table-column prop="surname" label="姓氏" width="120" align="center" />
+            <el-table-column prop="volume" label="总卷数" width="120" align="center" />
+            <el-table-column prop="volumeNumber" label="实拍卷数" width="120" align="center" />
+            <el-table-column prop="hall" label="堂号" width="120" align="center" />
+            <el-table-column prop="publish" label="出版年" width="120" align="center" />
+            <el-table-column prop="place" label="谱籍地" min-width="120" align="center" />
+            <el-table-column prop="authors" label="作者" width="120" align="center" />
+            <el-table-column prop="explain" label="说明" width="120" align="center" />
+            <el-table-column prop="memo" label="备注" width="120" align="center" />
+            <el-table-column label="操作" fixed="right" width="180" align="center">
+              <template #default="scope">
+                <button class="btn" @click="handleClickAction(scope.row, 'look')">查看</button>
+                <button class="btn" v-if="scope.row.hasImage == 1" @click="handleClickAction(scope.row, 'image')">影像</button>
+                <button class="btn" v-if="scope.row.hasIndex == 1" @click="handleClickAction(scope.row, 'text')">全文</button>
+              </template>
+            </el-table-column>
+          </el-table>
+          <!-- box -->
+          <section v-else class="catalog-wrap style1">
+            <div class="catalog-box" @click="handleClickAction(item, 'look')" v-for="(item, index) in tableData" :key="index">
+              <div class="cover">
+                <img src="../assets/cover.png" alt="封面" />
+                <i>{{item.genealogyName}}</i>
+              </div>
+              <div class="detail">
+                <h3 class="overflow" :title="item.genealogyName">{{item.genealogyName}}</h3>
+                <p>姓氏: {{item.surname}}</p>
+                <p>堂号: {{item.hall}}</p>
+                <p>出版年: {{item.publish}}</p>
+                <p :title="item.place">谱籍地: {{item.place}}</p>
+                <p class="overflow" :title="item.author">撰修者: {{item.author}}</p>
+              </div>
+            </div>
+          </section>
+          <!-- 分页器 -->
+          <div class="pagination-wrap">
+            <el-pagination
+              background
+              layout="prev, pager, next, jumper, total"
+              :current-page="page"
+              :page-size="limit"
+              :total="total"
+              @current-change="handleCurrentChange"
+            />
+          </div>
+        </article>
         <!-- 分面器 -->
-        <aside class="aside">
+        <aside class="aside marginL20">
           <div class="scroll-wrap">
               <img class="left" src="../assets/scrollLeft.png" alt="">
               <img class="right" src="../assets/scrollRight.png" alt="">
@@ -216,78 +274,16 @@ onMounted(() => {
             </div>
           </div>
         </aside>
-        <!-- 谱目列表 -->
-        <article class="article marginL20">
-          <div class="scroll-wrap">
-              <img class="left" src="../assets/scrollLeft.png" alt="">
-              <img class="right" src="../assets/scrollRight.png" alt="">
-          </div>
-          <el-table 
-            v-if="tab === 0"
-            ref="jiapu"
-            :data="tableData" 
-            border 
-            :height="h"
-            style="width: 100%">
-            <el-table-column prop="_key" label="谱ID" width="120" align="center" />
-            <el-table-column prop="genealogyName" label="谱名" min-width="120" align="center" />
-            <el-table-column prop="surname" label="姓氏" width="120" align="center" />
-            <el-table-column prop="volume" label="总卷数" width="120" align="center" />
-            <el-table-column prop="volumeNumber" label="实拍卷数" width="120" align="center" />
-            <el-table-column prop="hall" label="堂号" width="120" align="center" />
-            <el-table-column prop="publish" label="出版年" width="120" align="center" />
-            <el-table-column prop="place" label="谱籍地" min-width="120" align="center" />
-            <el-table-column prop="authors" label="作者" width="120" align="center" />
-            <!-- <el-table-column prop="authorJob" label="作者职务" width="120" align="center" />
-            <el-table-column prop="firstAncestor" label="一世祖" width="120" align="center" />
-            <el-table-column prop="migrationAncestor" label="始迁祖" width="120" align="center" /> -->
-            <el-table-column prop="explain" label="说明" width="120" align="center" />
-            <el-table-column prop="memo" label="备注" width="120" align="center" />
-            <el-table-column label="操作" fixed="right" width="150" align="center">
-              <template #default="scope">
-                <el-button size="small" type="primary" @click="handleClickAction(scope.row, 'look')">查看</el-button>
-                <el-button v-if="scope.row.hasImage == 1" size="small" type="primary" @click="handleClickAction(scope.row, 'image')">影像</el-button>
-                <el-button v-if="scope.row.hasIndex == 1" size="small" type="primary" @click="handleClickAction(scope.row, 'text')">全文</el-button>
-              </template>
-            </el-table-column>
-          </el-table>
-          <!-- box -->
-          <section v-else class="catalog-wrap style1">
-            <div class="catalog-box" @click="handleClickAction(item, 'look')" v-for="(item, index) in tableData" :key="index">
-              <div class="cover">
-                <img src="../assets/cover.png" alt="封面" />
-                <i>{{item.genealogyName}}</i>
-              </div>
-              <div class="detail">
-                <h3 class="overflow" :title="item.genealogyName">{{item.genealogyName}}</h3>
-                <p>姓氏: {{item.surname}}</p>
-                <p>堂号: {{item.hall}}</p>
-                <p>出版年: {{item.publish}}</p>
-                <p :title="item.place">谱籍地: {{item.place}}</p>
-                <p class="overflow" :title="item.author">撰修者: {{item.author}}</p>
-              </div>
-            </div>
-          </section>
-        </article>
       </section>
     </main>
-    <footer class="footer">
+    <!-- <footer class="footer">
       <div class="left">
           
       </div>
       <div class="right">
-        <!-- 分页器 -->
-        <el-pagination
-          small
-          background
-          layout="prev, pager, next, jumper, total"
-          :current-page="page"
-          :page-size="limit"
-          :total="total"
-          @current-change="handleCurrentChange"
-        />
+        
       </div>
-    </footer>
+    </footer> -->
   </section>
 </template>
 
@@ -295,18 +291,21 @@ onMounted(() => {
 .genealogy-search-wrap {
   position: relative;
   width: 100%;
-  height: 100%;
-  background: #f2f2f2 url('../assets/bg.png') 50% 0 no-repeat;
+  min-height: 100%;
+  background: #fffcf9;
+  // url('../assets/bg.png') 50% 0 no-repeat
   background-size: 100% 200px;
   color: #333;
   .main{
-    margin: 20px 50px auto 50px;
-    width: calc(100% - 100px);
-    height: calc(100% - 130px);
+    width: 100%;
+    padding-bottom: 30px;
+    // height: calc(100% - 130px);
     .search-wrap{
+      width: 1400px;
+      margin: 0 auto;
       padding: 30px;
-      background: url('../assets/eave.png') 0 0 repeat-x;
-      background-color: #fff;
+      background: #f8f8f8 url('../assets/Rectangle.png') 50% 50% no-repeat;
+      background-size: cover;
       .search-box{
         display: flex;
         justify-content: space-between;
@@ -314,34 +313,38 @@ onMounted(() => {
       }
     }
     .tab-section{
-      height: 30px;
-      line-height: 30px;
+      position: relative;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 14px;
+      margin: 85px 130px 50px 130px;
+      color: #7C4F11;
       .title{
-        height: 14px;
-        line-height: 14px;
+        font-size: 40px;
         font-weight: normal;
-        border-left: 4px solid #999;
-        padding-left: 5px;
-        font-size: 14px;
+        font-family: 'kaiti';
       }
       .tab-ul{
-        display: flex;
-        align-items: center;
+        position: absolute;
+        top: 102px;
+        left: 0;
+        font-size: 26px;
         li{
-          margin-left: 20px;
           cursor: pointer;
+          width: 26px;
+          margin-bottom: 30px;
+          padding-left: 7px;
           &.active{
-            color: #358acd;
+            font-weight: bold;
+            border-left: 4px solid #7C4F11;
           }
         }
       }
     }
     .data-section{
-      height: calc(100% - 194px);
+      width: 1460px;
+      margin: 0 auto;
+      // height: calc(100% - 341px);
       display: flex;
       .aside{
         position: relative;
@@ -351,8 +354,23 @@ onMounted(() => {
       }
       .article{
         position: relative;
-        padding-top: 25px;
-        width: calc(100% - 260px);
+        padding: 30px 20px 20px 20px;
+        width: calc(100% - 300px);
+        background-color: #fff;
+        .btn{
+          border: none;
+          outline: none;
+          color: #C9A470;
+          background-color: transparent;
+          margin: 0 10px;
+          cursor: pointer;
+        }
+        .pagination-wrap{
+          margin-top: 30px;
+          display: flex;
+          align-items: center;
+          justify-content: flex-end;
+        }
       }
     }
   }
@@ -405,7 +423,7 @@ onMounted(() => {
     margin-top: 20px;
   }
   .title{
-    border-left: 4px solid #999;
+    border-left: 3px solid #333;
     padding-left: 10px;
     margin-bottom: 20px;
     height: 14px;
