@@ -38,7 +38,7 @@ onMounted(() => {
 
 <template>
     <header class="header">
-      <h3 class="title" @click="goRouter('/')">鄞州图书馆</h3>
+      <img class="logo" src="../assets/logo.png" @click="goRouter('/')" />
       <nav class="nav">
         <router-link to="/GenealogySearch">检索中心</router-link>
         <router-link v-if="token" class="marginL20" to="/GenealogyManage">管理中心</router-link>
@@ -51,19 +51,18 @@ onMounted(() => {
 <style scoped lang="scss">
 .header{
     height: 160px;
-    padding: 0 250px;
-    width: calc(100% - 500px);
+    margin: 0 auto;
+    width: 1460px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: rgba(21,65,128,.6);
-    color: #fff;
-    .title{
+    color: #C9A470;
+    .logo{
         cursor: pointer;
     }
     .nav{
         a{
-            color: #fff;
+            color: #C9A470;
         }
     }
 }

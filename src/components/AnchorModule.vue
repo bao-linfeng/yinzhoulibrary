@@ -23,7 +23,7 @@ const logout = () => {
 }
 
 const goHome = () => {
-    router.push('/');
+    router.push('/GenealogySearch');
 }
 
 const goRouter = (data) => {

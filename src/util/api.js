@@ -115,6 +115,12 @@ const catalog = {
   hasImage(param) {// 绑定是否有影像
     return request.post('/catalog/hasImage', param);
   },
+  catalogAnalysis(param) {// 谱目目录解析
+    return request.post('/catalog/catalogAnalysis', param);
+  },
+  getCatalogAnalysisResult(param) {// 谱目目录解析结果
+    return request.get('/catalog/catalogAnalysisResult', param);
+  },
 };
 
 const volumeApi = {
@@ -159,6 +165,15 @@ const imageApi = {
   },
   getImageDetail(param) {// 影像页SimplePath
     return request.get('/image/imageSimplePath', param);
+  },
+  imageAnalysis(param){// 影像页xml解析
+		return request.post('/image/imageAnalysis', param);
+	},
+  imageSearchSingleGC(param) {// 影像页ocr检索（单谱）
+    return request.get('/image/imageSearchSingleGC', param);
+  },
+  imageOcrResult(param) {// 影像页oc结果
+    return request.get('/image/imageOcrResult', param);
   },
 };
 

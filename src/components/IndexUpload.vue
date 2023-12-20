@@ -47,7 +47,7 @@ const uploadLength = ref(0);
 let i = 0, l = 0, files = [];
 const handleInputChange = (e) => {
     files = Array.from(e.target.files).filter((ele) => {
-        return ele.name.indexOf('.jpg') > -1;
+        return ele.name.indexOf('.xml') > -1;
     });
     uploadLength.value = files.length;
     e.target.value = '';
@@ -57,14 +57,10 @@ function handleUploadImage(){
     if(uploadIndex.value < uploadLength.value){
         let fd = new FormData(), name = form.value.gcKey+'_'+form.value.internalSerialNumber+'_'+files[uploadIndex.value].name;
         fd.append('file', new File([files[uploadIndex.value]], name));
-        // fd.append('gcKey', form.value.gcKey);
-        // fd.append('internalSerialNumber', form.value.internalSerialNumber);
-        // console.log(fd.get('file'));
         uploadJPGOrXML(fd);
         fd = null;
         name = null;
     }else{
-        // uploadIndex.value = uploadIndex.value + 1;
         files = [];
         hasImage();
     }
@@ -73,7 +69,7 @@ function handleUploadImage(){
 const uploadJPGOrXML = async (fd) =>{
   const result = await uploadApi.uploadJPGOrXML(fd);
   if(result.status == 200){
-    createImage(result.simplePath);
+    imageAnalysis(result.simplePath);
   }else{
     ElMessage({
         message: result.msg,
@@ -84,8 +80,8 @@ const uploadJPGOrXML = async (fd) =>{
   }
 }
 
-const createImage = async (simplePath) => {
-  const result = await imageApi.createImage({
+const imageAnalysis = async (simplePath) => {
+  const result = await imageApi.imageAnalysis({
     'token': token.value,
     'gcKey': form.value.gcKey,
     'vKey': dataKey.value,
@@ -108,11 +104,11 @@ const hasImage = async () => {
   const result = await catalog.hasImage({
     'token': token.value,
     'gcKey': form.value.gcKey,
-    'type': 'hasImage',
+    'type': 'hasIndex',
   });
   if(result.status == 200){
     ElMessage({
-        message: '批量关联影像成功!',
+        message: '批量关联全文成功!',
         type: 'success',
     });
   }else{
@@ -137,9 +133,9 @@ onMounted(() => {
 </script>
 
 <template>
-    <section class="index-upload-section">
+    <section class="image-upload-section">
         <header class="header">
-            <h3 class="title">影像上传</h3>
+            <h3 class="title">全文上传</h3>
         </header>
         <main class="main marginT20">
             <el-form :model="form" label-width="60px">
@@ -174,7 +170,7 @@ onMounted(() => {
 </template>
 
 <style scoped lang="scss">
-.index-upload-section{
+.image-upload-section{
     position: fixed;
     top: 50%;
     left: 50%;

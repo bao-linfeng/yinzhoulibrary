@@ -8,6 +8,7 @@ import { ElLoading } from 'element-plus';
 import { getQueryVariable, createMsg, initDownloadExcel } from '../util/ADS';
 import VolumeEdit from '../components/VolumeEdit.vue';
 import ImageUpload from '../components/ImageUpload.vue';
+import IndexUpload from '../components/IndexUpload.vue';
 
 const router = useRouter();
 const global = useGlobalStore();
@@ -151,9 +152,10 @@ onMounted(() => {
         <el-table-column prop="volumeNumber" label="卷名" width="120" align="center" />
         <el-table-column prop="internalSerialNumber" label="卷序号" width="120" align="center" />
         <el-table-column prop="images" label="页码" width="120" align="center" />
-        <el-table-column label="操作" fixed="right" width="250" align="center">
+        <el-table-column label="操作" fixed="right" width="300" align="center">
           <template #default="scope">
             <el-button size="small" type="primary" @click="handleClickAction(scope.row, 'linkImages')">关联影像</el-button>
+            <el-button size="small" type="primary" @click="handleClickAction(scope.row, 'linkIndex')">关联全文</el-button>
             <el-button size="small" type="primary" @click="handleClickAction(scope.row, 'edit')">编辑</el-button>
             <el-popconfirm
               width="220"
@@ -190,6 +192,7 @@ onMounted(() => {
   </section>
   <VolumeEdit v-if="isShow === 'add' || isShow === 'edit'" :dataRow="dataRow" v-on:close="handleClose" />
   <ImageUpload v-if="isShow === 'linkImages'" :dataRow="dataRow" v-on:close="handleClose" />
+  <IndexUpload v-if="isShow === 'linkIndex'" :dataRow="dataRow" v-on:close="handleClose" />
 </template>
 
 <style scoped lang="scss">

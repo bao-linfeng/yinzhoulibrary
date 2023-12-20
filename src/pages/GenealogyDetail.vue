@@ -36,26 +36,27 @@ const getDataDetail = async () => {
 const dataKey = ref('');
 const detail = ref({});
 const field_main = ref([
-  {'fieldMeans': '谱ID', 'fieldName': '_key'},
+  // {'fieldMeans': '谱ID', 'fieldName': '_key'},
   // {'fieldMeans': '谱名', 'fieldName': 'genealogyName'},
   {'fieldMeans': '姓氏', 'fieldName': 'surname'},
   {'fieldMeans': '出版年', 'fieldName': 'publish'},
   {'fieldMeans': '堂号', 'fieldName': 'hall'},
-  {'fieldMeans': '一世祖', 'fieldName': 'firstAncestor'},
-  {'fieldMeans': '始迁祖', 'fieldName': 'migrationAncestor'},
-  {'fieldMeans': '谱籍地(现代)', 'fieldName': 'place'},
+  {'fieldMeans': '作者', 'fieldName': 'authors'},
+  // {'fieldMeans': '一世祖', 'fieldName': 'firstAncestor'},
+  // {'fieldMeans': '始迁祖', 'fieldName': 'migrationAncestor'},
+  // {'fieldMeans': '谱籍地(现代)', 'fieldName': 'place'},
   // {'fieldMeans': '谱籍地(原谱)', 'fieldName': 'LocalityModern'},
   {'fieldMeans': '总卷数', 'fieldName': 'volume'},
-  {'fieldMeans': '页数', 'fieldName': 'page'},
-  {'fieldMeans': '缺卷说明', 'fieldName': 'lostVolume'},
+  {'fieldMeans': '页数', 'fieldName': 'images'},
+  // {'fieldMeans': '缺卷说明', 'fieldName': 'lostVolume'},
   // {'fieldMeans': '可拍册数', 'fieldName': 'hasVolume'},
-  {'fieldMeans': '作者', 'fieldName': 'authors'},
-  {'fieldMeans': '作者职务', 'fieldName': 'authorJob'},
-  {'fieldMeans': '版本类型', 'fieldName': 'version'},
+  // {'fieldMeans': '作者', 'fieldName': 'authors'},
+  // {'fieldMeans': '作者职务', 'fieldName': 'authorJob'},
+  // {'fieldMeans': '版本类型', 'fieldName': 'version'},
 ]);
 
 const handleView = () => {
-  router.push('/ImageView?id='+dataKey.value+'&volumeKey='+detail.value.firstVolumeKey+'&page=1');
+  router.push('/ImageView?id='+dataKey.value+'&genealogyName='+detail.value.genealogyName+'&volumeKey='+detail.value.firstVolumeKey+'&page=1');
 }
 
 onMounted(() => {
@@ -72,19 +73,31 @@ onMounted(() => {
         <h3 class="title">家谱简介</h3>
         <section class="main-section marginT20">
             <aside class="aside">
-              <img class="cover" src="../assets/cover.png" />
+              <img class="cover" src="../assets/book-detail.png" />
               <p class="name">{{detail.genealogyName}}</p>
-              <el-button v-if="detail.hasImage == 1" class="marginT20" type="primary" @click="handleView">查看影像</el-button>
-              <el-button v-if="detail.hasIndex == 1" class="marginT20" type="primary" @click="handleView">查看全文</el-button>
+              <el-button v-if="detail.hasIndex == 1" class="btn" type="primary" @click="handleView"><img class="icon" src="../assets/影像.svg"><i>全文</i></el-button>
+              <el-button v-if="detail.hasImage == 1" class="btn" type="primary" @click="handleView"><img class="icon" src="../assets/影像.svg"><i>影像</i></el-button>
             </aside>
-            <article class="article marginL20">
-              <h3 class="title">{{detail.genealogyName}}</h3>
-              <ul class="detail-ul">
-                <li class="li marginT10" v-for="(item, index) in field_main" :key="index">
-                  <p>{{item.fieldMeans}}</p>
-                  <span>{{detail[item.fieldName]}}</span>
-                </li>
-              </ul>
+            <article class="article">
+              <div class="title-box">
+                <h3 class="title">{{detail.genealogyName}}</h3>
+                <img class="place" src="../assets/place.svg" />
+                <p>{{detail.place}}</p>
+              </div>
+              <div class="detail-box">
+                <ul class="detail-ul">
+                  <li class="li" v-for="(item, index) in field_main" :key="index">
+                    <p>{{item.fieldMeans}}</p>
+                    <span>{{detail[item.fieldName]}}</span>
+                  </li>
+                </ul>
+                <ul class="detail-ul">
+                  <li class="li">
+                    <p>摘要</p>
+                    <span>{{detail.explain}}</span>
+                  </li>
+                </ul>
+              </div>
             </article>
         </section>
     </main>
@@ -104,54 +117,78 @@ onMounted(() => {
   position: relative;
   width: 100%;
   height: 100%;
-  background: #f2f2f2 url('../assets/bg.png') 50% 0 no-repeat;
-  background-size: 100% 200px;
+  background: #fffcf9 url('../assets/detail_bg.png') 0 0 no-repeat;
+  background-size: cover;
   .main{
-    margin: 50px auto auto auto;
+    margin: 0 auto auto auto;
     padding: 30px;
-    width: 914px;
-    height: 470px;
-    background: url('../assets/eave.png') 0 0 repeat-x, url('../assets/long.png') 0 0 no-repeat;
-    background-color: #fff;
+    width: 1400px;
+    height: 694px;
+    background: url('../assets/eave.png') 0 0 repeat-x;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 0 10px 0 #fffcf9;
     >.title{
-      width: 200px;
+      width: 250px;
       height: 40px;
       line-height: 40px;
       text-align: center;
-      font-size: 24px;
+      font-size: 40px;
+      font-weight: normal;
       background: url('../assets/tleft.svg') 0 50% no-repeat, url('../assets/tright.svg') 100% 50% no-repeat; 
+      margin: 40px 0 30px 0;
+      font-family: 'kaiti';
     }
     .main-section{
       display: flex;
       .aside{
         position: relative;
-        width: 190px;
+        width: 290px;
         .name{
           position: absolute;
-          top: 60px;
-          right: 65px;
-          bottom: 95px;
+          top: 55px;
+          left: 65px;
+          bottom: 100px;
           text-align: center;
           color: #fff;
-          width: 12px;
-          font-size: 10px;
+          width: 20px;
+          font-size: 18px;
           font-style: normal;
           overflow: hidden;
+          font-family: 'kaiti';
         }
       }
       .article{
-        width: calc(100% - 210px);
-        .title{
-          font-size: 24px;
+        width: calc(100% - 350px);
+        margin-left: 60px;
+        .title-box{
+          display: flex;
+          align-items: center;
+          font-size: 20px;
+          color: #9D7747;
+          .title{
+            font-size: 40px;
+            margin-right: 40px;
+            font-family: 'kaiti';
+          }
+          .place{
+            cursor: pointer;
+            margin-right: 10px;
+          }
         }
-        .detail-ul{
-          .li{
+        .detail-box{
+          display: flex;
+          .detail-ul{
             width: 50%;
-            display: inline-flex;
-            align-items: center;
-            p{
-              font-weight: bold;
-              margin-right: 5px;
+            .li{
+              display: flex;
+              align-items: center;
+              font-size: 22px;
+              margin-top: 30px;
+              p{
+                font-weight: bold;
+                margin-right: 5px;
+                width: 80px;
+              }
             }
           }
         }
@@ -172,6 +209,17 @@ onMounted(() => {
         display: flex;
         align-items: center;
     }
+  }
+}
+.btn{
+  width: 135px;
+  height: 50px;
+  font-size: 20px;
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
+  .icon{
+    margin-right: 10px;
   }
 }
 </style>

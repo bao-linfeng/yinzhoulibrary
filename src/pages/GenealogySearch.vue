@@ -85,7 +85,7 @@ const SearchParameters = ref({
   'hasIndex': '',
 });
 const page = ref(1);
-const limit = ref(30);
+const limit = ref(16);
 const total = ref(0);
 const tableData = ref([]);
 const h = ref(200);
@@ -100,10 +100,10 @@ const handleClickAction = (row, t) => {
         router.push('/GenealogyDetail?id='+row._key);
     }
     if(t === 'image'){
-      router.push('/ImageView?id='+row._key+'&volumeKey='+row.firstVolumeKey+'&page=1');
+      router.push('/ImageView?id='+row._key+'&genealogyName='+row.genealogyName+'&volumeKey='+row.firstVolumeKey+'&page=1');
     }
     if(t === 'text'){
-      router.push('/ImageView?id='+row._key+'&volumeKey='+row.firstVolumeKey+'&page=1&isText=1');
+      router.push('/ImageView?id='+row._key+'&genealogyName='+row.genealogyName+'&volumeKey='+row.firstVolumeKey+'&page=1&isText=1');
     }
 }
 
@@ -115,7 +115,7 @@ const handleCurrentChange = (data) => {
 const tab = ref(0);
 const tabList = ref([
   {'label': '列表', 'value': 0},
-  {'label': '图库', 'value': 1},
+  {'label': '图列', 'value': 1},
 ]);
 
 
@@ -135,7 +135,7 @@ const changeProperty = (p, v) =>{
 }
 
 onMounted(() => {
-  h.value = 900;
+  h.value = 1050;
   SearchParameters.value.surname = getQueryVariable('surname') ? decodeURIComponent(getQueryVariable('surname')) : '';
   handleSearch();
 });
@@ -215,17 +215,10 @@ onMounted(() => {
           <!-- box -->
           <section v-else class="catalog-wrap style1">
             <div class="catalog-box" @click="handleClickAction(item, 'look')" v-for="(item, index) in tableData" :key="index">
-              <div class="cover">
-                <img src="../assets/cover.png" alt="封面" />
-                <i>{{item.genealogyName}}</i>
-              </div>
+              <i class="book">{{item.genealogyName}}</i>
               <div class="detail">
-                <h3 class="overflow" :title="item.genealogyName">{{item.genealogyName}}</h3>
-                <p>姓氏: {{item.surname}}</p>
-                <p>堂号: {{item.hall}}</p>
-                <p>出版年: {{item.publish}}</p>
-                <p :title="item.place">谱籍地: {{item.place}}</p>
-                <p class="overflow" :title="item.author">撰修者: {{item.author}}</p>
+                <h3 :title="item.genealogyName">{{item.genealogyName}}</h3>
+                <p>共 {{item.hasVolume}} 卷</p>
               </div>
             </div>
           </section>
@@ -292,14 +285,12 @@ onMounted(() => {
   position: relative;
   width: 100%;
   min-height: 100%;
-  background: #fffcf9;
-  // url('../assets/bg.png') 50% 0 no-repeat
-  background-size: 100% 200px;
+  background: #fffcf9 url('../assets/bg.png') 50% 0 no-repeat;
+  background-size: 100% auto;
   color: #333;
   .main{
     width: 100%;
     padding-bottom: 30px;
-    // height: calc(100% - 130px);
     .search-wrap{
       width: 1400px;
       margin: 0 auto;
@@ -319,10 +310,10 @@ onMounted(() => {
       align-items: center;
       margin: 85px 130px 50px 130px;
       color: #7C4F11;
+      font-family: 'kaiti';
       .title{
         font-size: 40px;
         font-weight: normal;
-        font-family: 'kaiti';
       }
       .tab-ul{
         position: absolute;
@@ -448,49 +439,43 @@ onMounted(() => {
 .catalog-wrap{
   position: relative;
   width: 100%;
-  height: 100%;
+  height: 1450px;
   font-size: 20px;
-  overflow-y: auto;
   .catalog-box{
     position: relative;
-    height: 240px;
-    width: 430px;
+    height: 342px;
+    width: 217px;
     color: #333;
-    border: 1px solid #ddd;
-    border-radius: 3px;
     display: inline-flex;
-    margin: 20px 10px 0 10px;
-    padding: 10px;
-    .cover{
-      position: relative;
-      width: 190px;
-      height: 240px;
-      img{
-          display: block;
-      }
-      i{
-        position: absolute;
-        top: 60px;
-        right: 60px;
-        max-height: 140px;
-        font-style: normal;
-        writing-mode: tb-rl;
-        line-height: 14px;
-        font-size: 12px;
-        color: #fff;
-      }
+    margin: 20px 36px 0 36px;
+    background: url('../assets/book.png') 50% 50% no-repeat;
+    background-size: cover;
+    cursor: pointer;
+    .book{
+      position: absolute;
+      top: 55px;
+      left: 55px;
+      max-height: 140px;
+      font-style: normal;
+      writing-mode: tb-rl;
+      line-height: 14px;
+      font-size: 12px;
+      color: #fff;
     }
     .detail{
-      color: #333;
-      margin-left: 20px;
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #1A365C;
       width: 200px;
-      font-size: 16px;
-      p{
-        font-size: 16px;
-        margin: 10px 0 5px 0;
+      font-size: 14px;
+      text-align: center;
+      h3{
         overflow: hidden;
         white-space: nowrap;
         text-overflow: ellipsis;
+        margin-bottom: 5px;
       }
     }
   }

@@ -38,6 +38,9 @@ i{
 .marginL20{
   margin-left: 20px;
 }
+.marginR20{
+  margin-right: 20px;
+}
 .marginT10{
   margin-top: 10px;
 }
@@ -136,4 +139,6 @@ i{
 /*  */
 :root {
   --el-color-primary: #C9A470 !important;
+  --el-color-primary-light-3: #C9A470 !important;
+  --el-color-primary-dark-2: #C9A470 !important;
 }

@@ -28,7 +28,8 @@ const getImageList = async () => {
   if(result.status == 200){
     imageList.value = result.data;
     total.value = imageList.value.length;
-    getImageDetail(imageList.value[page.value - 1]);
+    getImageDetail(imageList.value[page.value - 1]._key);
+    imageOcrResult(imageList.value[page.value - 1].serialNumber);
   }else{
     createMsg(result.msg);
   }
@@ -72,64 +73,134 @@ const getVolumeList = async () => {
   }
 };
 
+const getCatalogAnalysisResult = async () => {
+  const loading = ElLoading.service({
+    lock: true,
+    text: 'Loading',
+    background: 'rgba(0, 0, 0, 0.7)',
+  });
+  const result = await catalog.getCatalogAnalysisResult({
+    'gcKey': dataKey.value,
+  });
+  loading.close();
+  if(result.status == 200){
+    analysisList.value = result.data;
+  }else{
+    createMsg(result.msg);
+  }
+};
+
+const imageOcrResult = async (serialNumber) => {
+  const loading = ElLoading.service({
+    lock: true,
+    text: 'Loading',
+    background: 'rgba(0, 0, 0, 0.7)',
+  });
+  const result = await imageApi.imageOcrResult({
+    'gcKey': dataKey.value,
+    'vKey': volumeKey.value,
+    'serialNumber': serialNumber,
+  });
+  loading.close();
+  if(result.status == 200){
+    textAllList.value = result.data;
+  }else{
+    createMsg(result.msg);
+  }
+};
+
+const imageSearchSingleGC = async (content) => {
+  const loading = ElLoading.service({
+    lock: true,
+    text: 'Loading',
+    background: 'rgba(0, 0, 0, 0.7)',
+  });
+  const result = await imageApi.imageSearchSingleGC({
+    'gcKey': dataKey.value,
+    'content': content,
+  });
+  loading.close();
+  if(result.status == 200){
+    textList.value = result.data;
+  }else{
+    createMsg(result.msg);
+  }
+};
+
 const dataKey = ref('');
+const genealogyName = ref('');
 const imageList = ref({});
 const volumeKey = ref(1);
 const page = ref(1);
+const currentPage = ref(1);
 const total = ref(100);
 const imageDetail = ref('');
 const isText = ref('');
 const volumeList = ref([]);
-const handleView = () => {
-  router.push('/ImageView?id='+dataKey.value);
+const goBack = () => {
+  router.push('/GenealogyDetail?id='+dataKey.value);
 }
 
-const menu = ref('1');
-const menuList = ref([
-  {'label': '目录', 'value': '1'},
-  {'label': '序文', 'value': '2'},
-  {'label': '世系', 'value': '3'},
-]);
+const analysis = ref('1');
+const analysisList = ref([]);
 
 const vertical = ref(false);
 const keyWord = ref('');
 const text = ref('');
-const textList = ref([
-  {'label': '王子文 卷1 12页', 'value': '1'},
-  {'label': '王子文 卷2 10页', 'value': '2'},
-  {'label': '王子文 卷3 1页', 'value': '3'},
-]);
+const textList = ref([]);
 const textAll = ref('');
-const textAllList = ref([
-  '12月的越南河内，处处绽放中越友谊之花。', 
-  '应越共中央总书记阮富仲、越南国家主席武文赏邀请，中共中央总书记、国家主席习近平12月12日至13日对越南进行国事访问。', 
-  '访问期间，双方宣布中越两党两国关系新定位，在深化中越全面战略合作伙伴关系基础上，携手构建具有战略意义的中越命运共同体。这是中越关系发展史上一座新的里程碑。',
-  '12月的越南河内，处处绽放中越友谊之花。', 
-  '应越共中央总书记阮富仲、越南国家主席武文赏邀请，中共中央总书记、国家主席习近平12月12日至13日对越南进行国事访问。', 
-  '访问期间，双方宣布中越两党两国关系新定位，在深化中越全面战略合作伙伴关系基础上，携手构建具有战略意义的中越命运共同体。这是中越关系发展史上一座新的里程碑。',
-  '12月的越南河内，处处绽放中越友谊之花。', 
-  '应越共中央总书记阮富仲、越南国家主席武文赏邀请，中共中央总书记、国家主席习近平12月12日至13日对越南进行国事访问。', 
-  '访问期间，双方宣布中越两党两国关系新定位，在深化中越全面战略合作伙伴关系基础上，携手构建具有战略意义的中越命运共同体。这是中越关系发展史上一座新的里程碑。',
-  '12月的越南河内，处处绽放中越友谊之花。', 
-  '应越共中央总书记阮富仲、越南国家主席武文赏邀请，中共中央总书记、国家主席习近平12月12日至13日对越南进行国事访问。', 
-  '访问期间，双方宣布中越两党两国关系新定位，在深化中越全面战略合作伙伴关系基础上，携手构建具有战略意义的中越命运共同体。这是中越关系发展史上一座新的里程碑。',
-  '12月的越南河内，处处绽放中越友谊之花。', 
-  '应越共中央总书记阮富仲、越南国家主席武文赏邀请，中共中央总书记、国家主席习近平12月12日至13日对越南进行国事访问。', 
-  '访问期间，双方宣布中越两党两国关系新定位，在深化中越全面战略合作伙伴关系基础上，携手构建具有战略意义的中越命运共同体。这是中越关系发展史上一座新的里程碑。',
-  '12月的越南河内，处处绽放中越友谊之花。', 
-  '应越共中央总书记阮富仲、越南国家主席武文赏邀请，中共中央总书记、国家主席习近平12月12日至13日对越南进行国事访问。', 
-  '访问期间，双方宣布中越两党两国关系新定位，在深化中越全面战略合作伙伴关系基础上，携手构建具有战略意义的中越命运共同体。这是中越关系发展史上一座新的里程碑。',
-  '12月的越南河内，处处绽放中越友谊之花。', 
-  '应越共中央总书记阮富仲、越南国家主席武文赏邀请，中共中央总书记、国家主席习近平12月12日至13日对越南进行国事访问。', 
-  '访问期间，双方宣布中越两党两国关系新定位，在深化中越全面战略合作伙伴关系基础上，携手构建具有战略意义的中越命运共同体。这是中越关系发展史上一座新的里程碑。',
-]);
+const textAllList = ref([]);
 const handleSearch = () => {
+  if(!keyWord.value){
+    textList.value = [];
+  }else{
+    imageSearchSingleGC(keyWord.value);
+  }
+}
 
+const changePage = (t) => {
+  if(t === 'prev'){
+    if(page.value >= 2){
+      page.value = page.value - 1;
+    }
+  }else if(t === 'next'){
+    if(page.value < total.value){
+      page.value = page.value + 1;
+    }
+  }
+}
+
+const handleClickAnalysis = (data) => {
+  analysis.value = data.title;
+  imageList.value.forEach((ele, index) => {
+    if(ele.serialNumber === data.startSerialNumber){
+      page.value = currentPage.value = index + 1;
+    }
+  });
+}
+
+const handleInputChange = (e) => {
+  page.value = Number(currentPage.value);
+}
+
+const handleClickText = (data) => {
+  if(data.vKey === volumeKey.value){
+    if(data.pageNumber === page.value){
+      textAll.value = data.content;
+    }else{
+      textAll.value = data.content;
+      page.value = currentPage.value = data.pageNumber;
+    }
+  }else{
+
+  }
 }
 
 watch(page, (nv, ov) => {
   console.log(nv);
-  getImageDetail(imageList.value[page.value - 1]);
+  // textAll.value = '';
+  getImageDetail(imageList.value[page.value - 1]._key);
+  imageOcrResult(imageList.value[page.value - 1].serialNumber);
 });
 
 watch(volumeKey, (nv, ov) => {
@@ -139,53 +210,70 @@ watch(volumeKey, (nv, ov) => {
 
 onMounted(() => {
     dataKey.value = getQueryVariable('id');
+    genealogyName.value = getQueryVariable('genealogyName') ? decodeURIComponent(getQueryVariable('genealogyName')) : '';
     volumeKey.value = getQueryVariable('volumeKey');
     page.value = Number(getQueryVariable('page'));
+    currentPage.value = page.value;
     isText.value = getQueryVariable('isText');
     getVolumeList();
+    getCatalogAnalysisResult();
 });
 
 </script>
 
 <template>
   <section class="image-view-wrap">
-    <main class="main" :class="{active: isText != 1}">
-      <aside class="aside" v-if="isText == 1">
-        <p :class="{active: menu === item.value}" v-for="(item, index) in menuList" :key="index" @click="menu = item.value">{{item.label}}</p>
-      </aside>
-      <div class="large-image" :class="{active: isText != 1}">
-        <img class="image" :src="imageDetail" />
-      </div>
-      <article class="article" v-if="isText == 1">
-        <div class="search-box">
-          <el-input class="w300" v-model="keyWord" placeholder="全文内容" clearable />
-          <el-button type="primary" @click="handleSearch">检索</el-button>
+    <aside class="aside" v-if="isText == 1">
+      <h3 class="title">目录</h3>
+      <ul class="analysis-wrap style1">
+        <li class="analysis-box" :class="{active: analysis === item.title}" v-for="(item, index) in analysisList" :key="index">
+          <p :class="{active: analysis === item.title}" @click="handleClickAnalysis(item)">{{item.title}}</p>
+          <p class="textIndent20" :class="{active: analysis === item2.title}" v-for="(item2, index2) in item.children" :key="index" @click="handleClickAnalysis(item2)">{{item2.title}}</p>
+        </li>
+      </ul>
+    </aside>
+    <section class="content" :class="{active: isText != 1}">
+      <header class="header">
+        <div class="box">
+          <img class="back" src="../assets/返回.svg" @click="goBack" />
+          <h3 class="title">{{genealogyName}}</h3>
+          <el-select v-model="volumeKey" placeholder="卷册列表" class="w150">
+            <el-option
+              v-for="(item,index) in volumeList"
+              :key="index"
+              :label="item.label"
+              :value="item.value">
+            </el-option>
+          </el-select>
         </div>
-        <el-select class="w150 marginT10" v-model="text" placeholder="全文">
-          <el-option
-            v-for="(item,index) in textList"
-            :key="index"
-            :label="item.label"
-            :value="item.value">
-          </el-option>
-        </el-select>
-        <div class="text-wrap style1" :class="{active: vertical}">
-          <p :class="{active: textAll === item, vertical: vertical}" v-for="(item, index) in textAllList" :key="index" @click="textAll = item">{{item}}</p>
+        <div class="box"></div>
+      </header>
+      <main class="main" :class="{active: isText != 1}">
+        <!-- 图片 -->
+        <div class="large-image" :class="{active: isText != 1}">
+          <img class="image" :src="imageDetail" />
         </div>
-      </article>
-    </main>
-    <footer class="footer">
-      <el-select v-model="volumeKey" placeholder="卷册列表" class="w150">
-        <el-option
-          v-for="(item,index) in volumeList"
-          :key="index"
-          :label="item.label"
-          :value="item.value">
-        </el-option>
-      </el-select>
-      <el-slider class="marginL20" v-model="page" :min="1" :max="total" show-input />
-      <p class="marginL20">/{{total}}</p>
-    </footer>
+        <!-- 全文 -->
+        <article class="article" v-if="isText == 1">
+          <div class="search-box">
+            <el-input class="search" v-model="keyWord" placeholder="请输入关键字" @change="handleSearch" clearable />
+            <ul class="textList style1" v-if="textList.length">
+              <li v-for="(item, index) in textList" :key="index" @click="handleClickText(item)">{{item.content}}-{{item.volumeNumber}}-{{item.pageNumber}}页</li>
+            </ul>
+          </div>
+          <div class="text-wrap style1" :class="{active: vertical}">
+            <p :class="{active: textAll === item.content, vertical: vertical}" v-for="(item, index) in textAllList" :key="index" @click="textAll = item.content">{{item.content}}</p>
+          </div>
+        </article>
+        <img v-if="page >= 2" class="prev" src="../assets/左翻.svg" @click="changePage('prev')" />
+        <img v-if="page < total" class="prev next" src="../assets/右翻.svg" @click="changePage('next')" />
+      </main>
+      <!-- 分页 -->
+      <footer class="footer">
+        <p class="marginR20">{{page}}/{{total}} 跳转至</p>
+        <el-input class="w150" v-model="currentPage" @change="handleInputChange"  />
+      </footer>
+    </section>
   </section>
 </template>
 
@@ -194,53 +282,137 @@ onMounted(() => {
   position: relative;
   width: 100%;
   height: 100%;
-  background-color: #333;
-  color: #fff;
-  .main{
-    position: relative;
-    width: 100%;
-    height: calc(100% - 60px);
-    display: flex;
-    align-items: center;
-    &.active{
-      justify-content: center;
+  background: #fffcf9 url('../assets/detail_bg.png') 0 0 no-repeat;
+  background-size: cover;
+  color: #333;
+  display: flex;
+  .aside{
+    width: 300px;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 0 10px 0 #fffcf9;
+    text-indent: 20px;
+    .title{
+      height: 60px;
+      line-height: 60px;
+      border-bottom: 2px solid #c9a470;
+      font-size: 32px;
+      color: #7C4F11;
+      font-family: 'kaiti';
     }
-    .aside{
-      width: 200px;
-      height: 100%;
-      background-color: #666;
-      p{
-        margin: 10px 0 0 10px;
-        cursor: pointer;
-        &:hover{
-          color: #358acd;
+    .analysis-wrap{
+      height: calc(100% - 80px);
+      overflow-y: auto;
+      .analysis-box{
+        .textIndent20{
+          text-indent: 40px;
         }
-        &.active{
-          color: #358acd;
+        p{
+          height: 38px;
+          line-height: 38px;
+          cursor: pointer;
+          &:hover{
+            color: #7C4F11;
+            background: #f8eedf;
+          }
+          &.active{
+            color: #7C4F11;
+            background: #f8eedf;
+          }
         }
       }
     }
-    .large-image{
-      width: calc(100% - 600px);
-      height: 100%;
+  }
+  .content{
+    position: relative;
+    width: calc(100% - 300px);
+    height: 100%;
+    &.active{
+      width: 100%;
+    }
+  }
+  .header{
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    .box{
       display: flex;
-      justify-content: center;
       align-items: center;
+      justify-content: space-between;
+      .back{
+        cursor: pointer;
+        margin-left: 10px;
+      }
+      .title{
+        margin: 0 10px;
+        height: 16px;
+        line-height: 16px;
+      }
+    }
+  }
+  .main{
+    position: relative;
+    width: 100%;
+    height: calc(100% - 120px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    &.active{
+      width: 100%;
+      justify-content: center;
+    }
+    .large-image{
+      height: calc(100% - 60px);
+      padding: 30px;
+      background-color: #fff;
       &.active{
-        width: 100%;
+        height: 100%;
+        background-color: transparent;
+        margin: 0 auto;
       }
       .image{
         height: 100%;
       }
     }
     .article{
-      width: 380px;
-      height: calc(100% - 20px);
-      padding: 10px;
-      background-color: #666;
-      .text-wrap{
+      width: 340px;
+      height: calc(100% - 60px);
+      padding: 30px;
+      background-color: #fff;
+      .search-box{
         position: relative;
-        height: calc(100% - 74px);
+        width: 100%;
+        .search{
+          text-indent: 40px;
+        }
+        .textList{
+          position: absolute;
+          top: 100%;
+          left: 0;
+          padding: 10px 20px;
+          width: calc(100% - 40px);
+          background-color: #fff;
+          box-shadow: 0 0 1px 0 #7C4F11;
+          z-index: 1000;
+          max-height: 150px;
+          overflow-y: auto;
+          border-radius: 5px;
+          li{
+            height: 30px;
+            line-height: 30px;
+            cursor: pointer;
+            &:hover{
+              color: #7C4F11;
+            }
+          }
+        }
+      }
+      .text-wrap{
+        margin-top: 170px;
+        position: relative;
+        height: calc(100% - 200px);
         overflow-y: auto;
         &.active{
           overflow-y: hidden;
@@ -251,10 +423,10 @@ onMounted(() => {
           cursor: pointer;
           margin-top: 10px;
           &:hover{
-            color: #358acd;
+            color: #7C4F11;
           }
           &.active{
-            color: #358acd;
+            color: #7C4F11;
           }
           &.vertical{
             margin: 10px 10px 0 0;
@@ -266,16 +438,26 @@ onMounted(() => {
         }
       }
     }
+    .prev{
+      position: absolute;
+      top: 50%;
+      left: 10%;
+      transform: translateY(-50%);
+      cursor: pointer;
+    }
+    .next{
+      left: auto;
+      right: 10%;
+    }
   }
   .footer{
     width: calc(100% - 40px);
     padding: 0 20px;
     height: 60px;
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
-    color: #fff;
-    background-color: #444;
+
   }
 }
 </style>

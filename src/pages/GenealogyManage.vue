@@ -3,8 +3,8 @@ import { ref, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useGlobalStore } from '../store/global.js';
-import { catalog, baseURL } from '../util/api';
-import { ElLoading } from 'element-plus';
+import { catalog, baseURL, uploadApi } from '../util/api';
+import { ElLoading, ElMessage } from 'element-plus';
 import { getQueryVariable, createMsg, initDownloadExcel, downliadLink } from '../util/ADS';
 import GenealogyEdit from '../components/GenealogyEdit.vue';
 
@@ -102,6 +102,9 @@ const handleSearch = () => {
 }
 
 const handleClickAction = (row, t) => {
+  if(t === 'lookImage'){
+    router.push('/ImageView?id='+row._key+'&genealogyName='+row.genealogyName+'&volumeKey='+row.firstVolumeKey+'&page=1');
+  }
   if(t === 'lookVolume'){
     router.push('/VolumeManage?id='+row._key);
   }
@@ -149,6 +152,55 @@ const handleBatchUpdate = (response, uploadFile, uploadFiles) => {
     createMsg(response.msg);
   }
 }
+
+const handleClickInput = (row) => {
+  dataRow.value = row;
+}
+
+const handleInputChange = (e) => {
+  let file = e.target.files[0], fd = new FormData(), name = dataRow.value._key+'_'+file.name;
+
+  fd.append('file', new File([file], name));
+  fd.append('project', 1);
+  uploadJPGOrXML(fd);
+
+  file = null;
+  fd = null;
+  name = null;
+  e.target.value = '';
+}
+
+const uploadJPGOrXML = async (fd) =>{
+  const result = await uploadApi.uploadJPGOrXML(fd);
+  if(result.status == 200){
+    catalogAnalysis(result.simplePath);
+  }else{
+    ElMessage({
+      message: result.msg,
+      type: 'warning',
+    });
+  }
+}
+
+const catalogAnalysis = async (simplePath) => {
+  const result = await catalog.catalogAnalysis({
+    'token': token.value,
+    'gcKey': dataRow.value._key,
+    'simplePath': simplePath,
+  });
+  if(result.status == 200){
+    ElMessage({
+      message: '目录解析成功!',
+      type: 'success',
+    });
+    handleSearch();
+  }else{
+    ElMessage({
+      message: result.msg,
+      type: 'warning',
+    });
+  }
+};
 
 onMounted(() => {
   h.value = window.innerHeight - 50 - 50 - 72 - 20 - 20;
@@ -207,8 +259,9 @@ onMounted(() => {
         <el-table-column prop="images" label="影像页" width="120" align="center" />
         <el-table-column prop="explain" label="说明" width="120" align="center" />
         <el-table-column prop="memo" label="备注" width="120" align="center" />
-        <el-table-column label="操作" fixed="right" width="150" align="center">
+        <el-table-column label="操作" fixed="right" width="200" align="center">
           <template #default="scope">
+            <el-button size="small" type="primary" @click="handleClickAction(scope.row, 'lookImage')">影像</el-button>
             <el-button size="small" type="primary" @click="handleClickAction(scope.row, 'lookVolume')">查看卷册</el-button>
             <el-button size="small" type="primary" @click="handleClickAction(scope.row, 'edit')">编辑</el-button>
             <el-popconfirm
@@ -222,6 +275,10 @@ onMounted(() => {
                   <el-button type="primary" size="small">删除</el-button>
               </template>
             </el-popconfirm>
+            <div class="upload-box">
+              <input type="file" id="fileInput" @click="handleClickInput(scope.row)" @change="handleInputChange" accept=".xml" />
+              <label for="fileInput" class="label">目录解析</label>
+            </div>
           </template>
         </el-table-column>
       </el-table>
@@ -291,6 +348,32 @@ onMounted(() => {
       display: flex;
       align-items: center;
     }
+  }
+}
+.upload-box{
+  position: relative;
+  width: 72px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  margin: 2px 0 0 10px;
+  #fileInput{
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .label{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    background-color: #C9A470;
+    color: #fff;
+    border-radius: 2px;
+    cursor: pointer;
+    font-size: 12px;
   }
 }
 </style>
