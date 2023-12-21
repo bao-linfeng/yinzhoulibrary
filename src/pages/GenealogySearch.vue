@@ -28,7 +28,7 @@ const getDataList = async () => {
     'publish': SearchParameters.value.publish,
     'authors': SearchParameters.value.authors,
     'place': SearchParameters.value.place,
-    'keyWord': SearchParameters.value.keyWord,
+    'content': SearchParameters.value.content,
     'hasImage': SearchParameters.value.hasImage,
     'hasIndex': SearchParameters.value.hasIndex,
     'page': page.value,
@@ -57,7 +57,7 @@ const GCResolverFrontEnd = async () => {
     'publish': SearchParameters.value.publish,
     'authors': SearchParameters.value.authors,
     'place': SearchParameters.value.place,
-    'keyWord': SearchParameters.value.keyWord,
+    'content': SearchParameters.value.content,
     'hasImage': SearchParameters.value.hasImage,
     'hasIndex': SearchParameters.value.hasIndex,
   });
@@ -80,7 +80,7 @@ const SearchParameters = ref({
   'publish': '',
   'authors': '',
   'place': '',
-  'keyWord': '',
+  'content': '',
   'hasImage': '',
   'hasIndex': '',
 });
@@ -100,10 +100,12 @@ const handleClickAction = (row, t) => {
         router.push('/GenealogyDetail?id='+row._key);
     }
     if(t === 'image'){
-      router.push('/ImageView?id='+row._key+'&genealogyName='+row.genealogyName+'&volumeKey='+row.firstVolumeKey+'&page=1');
+      window.open('/ImageView?id='+row._key+'&genealogyName='+row.genealogyName+'&volumeKey='+row.firstVolumeKey+'&page='+(row.indexImagePage + 1));
+      // router.push('/ImageView?id='+row._key+'&genealogyName='+row.genealogyName+'&volumeKey='+row.firstVolumeKey+'&page=1');
     }
     if(t === 'text'){
-      router.push('/ImageView?id='+row._key+'&genealogyName='+row.genealogyName+'&volumeKey='+row.firstVolumeKey+'&page=1&isText=1');
+      window.open('/ImageView?id='+row._key+'&genealogyName='+row.genealogyName+'&volumeKey='+row.firstVolumeKey+'&page='+(row.indexImagePage + 1)+'&content='+SearchParameters.value.content+'&isText=1');
+      // router.push('/ImageView?id='+row._key+'&genealogyName='+row.genealogyName+'&volumeKey='+row.firstVolumeKey+'&page=1&isText=1');
     }
 }
 
@@ -158,7 +160,7 @@ onMounted(() => {
         </div>
         <div class="search-box marginT30">
           <el-input v-model="SearchParameters.publish" class="w20p" placeholder="请输入出版年" clearable />
-          <el-input v-model="SearchParameters.keyWord" class="w20p" placeholder="请输入全文关键字" clearable />
+          <el-input v-model="SearchParameters.content" class="w20p" placeholder="请输入全文关键字" clearable />
           <el-radio-group class="w20p" v-model="SearchParameters.hasImage">
             <el-radio :label="''">全部影像</el-radio>
             <el-radio :label="'1'">有影像</el-radio>
@@ -191,13 +193,13 @@ onMounted(() => {
             v-if="tab === 0"
             ref="jiapu"
             :data="tableData"  
-            :height="h"
+            :min-height="h"
             style="width: 100%">
             <el-table-column prop="_key" label="谱ID" width="120" align="center" />
             <el-table-column prop="genealogyName" label="谱名" min-width="120" align="center" />
             <el-table-column prop="surname" label="姓氏" width="120" align="center" />
             <el-table-column prop="volume" label="总卷数" width="120" align="center" />
-            <el-table-column prop="volumeNumber" label="实拍卷数" width="120" align="center" />
+            <el-table-column prop="hasVolume" label="实拍卷数" width="120" align="center" />
             <el-table-column prop="hall" label="堂号" width="120" align="center" />
             <el-table-column prop="publish" label="出版年" width="120" align="center" />
             <el-table-column prop="place" label="谱籍地" min-width="120" align="center" />
@@ -248,12 +250,6 @@ onMounted(() => {
               </ul>
             </div>
             <div class="box">
-              <h3 class="title">谱籍地</h3>
-              <ul class="list-wrap style1">
-                  <li class="li" :class="{active: SearchParameters.place == item.place}" v-for="(item, index) in listPlace" :key="index" @click="changeProperty('place', item.place)">{{item.place}}({{item.length}})</li>
-              </ul>
-            </div>
-            <div class="box">
               <h3 class="title">堂号</h3>
               <ul class="list-wrap style1">
                   <li class="li" :class="{active: SearchParameters.hall == item.hall}" v-for="(item, index) in listHall" :key="index" @click="changeProperty('hall', item.hall)">{{item.hall}}({{item.length}})</li>
@@ -263,6 +259,12 @@ onMounted(() => {
               <h3 class="title">作者</h3>
               <ul class="list-wrap style1">
                   <li class="li" :class="{active: SearchParameters.authors == item.authors}" v-for="(item, index) in listAuthors" :key="index" @click="changeProperty('authors', item.authors)">{{item.authors}}({{item.length}})</li>
+              </ul>
+            </div>
+            <div class="box">
+              <h3 class="title">谱籍地</h3>
+              <ul class="list-wrap style1">
+                  <li class="li" :class="{active: SearchParameters.place == item.place}" v-for="(item, index) in listPlace" :key="index" @click="changeProperty('place', item.place)">{{item.place}}({{item.length}})</li>
               </ul>
             </div>
           </div>
@@ -406,11 +408,12 @@ onMounted(() => {
 }
 // 分面器
 .statistics{
+  position: relative;
   height: calc(100% - 45px);
   padding: 20px;
   font-size: 16px;
   .box{
-    height: calc(25% - 20px);
+    height: 350px;
     margin-top: 20px;
   }
   .title{
@@ -439,7 +442,7 @@ onMounted(() => {
 .catalog-wrap{
   position: relative;
   width: 100%;
-  height: 1450px;
+  height: 1470px;
   font-size: 20px;
   .catalog-box{
     position: relative;

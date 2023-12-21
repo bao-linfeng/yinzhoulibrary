@@ -55,8 +55,9 @@ const field_main = ref([
   // {'fieldMeans': '版本类型', 'fieldName': 'version'},
 ]);
 
-const handleView = () => {
-  router.push('/ImageView?id='+dataKey.value+'&genealogyName='+detail.value.genealogyName+'&volumeKey='+detail.value.firstVolumeKey+'&page=1');
+const handleView = (i) => {
+  window.open('/ImageView?id='+dataKey.value+'&genealogyName='+detail.value.genealogyName+'&volumeKey='+detail.value.firstVolumeKey+'&page=1&isText='+i);
+  // router.push('/ImageView?id='+dataKey.value+'&genealogyName='+detail.value.genealogyName+'&volumeKey='+detail.value.firstVolumeKey+'&page=1&isText='+i);
 }
 
 onMounted(() => {
@@ -75,8 +76,8 @@ onMounted(() => {
             <aside class="aside">
               <img class="cover" src="../assets/book-detail.png" />
               <p class="name">{{detail.genealogyName}}</p>
-              <el-button v-if="detail.hasIndex == 1" class="btn" type="primary" @click="handleView"><img class="icon" src="../assets/影像.svg"><i>全文</i></el-button>
-              <el-button v-if="detail.hasImage == 1" class="btn" type="primary" @click="handleView"><img class="icon" src="../assets/影像.svg"><i>影像</i></el-button>
+              <el-button v-if="detail.hasIndex == 1" class="btn" type="primary" @click="handleView('1')"><img class="icon" src="../assets/影像.svg"><i>全文</i></el-button>
+              <el-button v-if="detail.hasImage == 1" class="btn" type="primary" @click="handleView('')"><img class="icon" src="../assets/影像.svg"><i>影像</i></el-button>
             </aside>
             <article class="article">
               <div class="title-box">
@@ -216,7 +217,7 @@ onMounted(() => {
   height: 50px;
   font-size: 20px;
   margin-top: 20px;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   .icon{
     margin-right: 10px;

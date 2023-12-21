@@ -19,9 +19,13 @@ const goRouter = () => {
 
 <template>
   <section class="home-wrap">
+    <img class="title" src="../assets/标题.png" />
+    <i class="line"></i>
     <main class="main">
-      <el-input class="w300" v-model="surname" size="large"  placeholder="请输入姓氏" />
-      <el-button type="primary" size="large" @click="goRouter">检索</el-button>
+      <img class="search-title" src="../assets/检索标题.svg" />
+      <div class="search-box">
+        <input class="search" type="text" v-model="surname" @change="goRouter" placeholder="请输入姓氏" />
+      </div>
     </main>
   </section>
 </template>
@@ -31,14 +35,46 @@ const goRouter = () => {
   position: relative;
   width: 100%;
   height: 100%;
-  background: url('../assets/home-bg.jpg');
+  background: url('../assets/背景.png');
   background-size: cover;
   display: flex;
   justify-content: center;
   align-items: center;
-  .main{
-    display: flex;
-    align-items: center;
+  .title{
+    width: 312px;
   }
+  .line{
+    width: 1px;
+    height: 415px;
+    border: 1px solid #0a365c;
+    background-color: #0a365c;
+    margin: 0 185px;
+  }
+  .main{
+    text-align: center;
+    .search-box{
+      width: 350px;
+      height: 46px;
+      background: url('../assets/home-search.svg');
+      background-size: cover;
+      margin-top: 43px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      .search{
+        width: calc(100% - 40px);
+        height: 100%;
+        font-size: 20px;
+        outline: none;
+        border: none;
+        font-family: "楷体";
+      }
+    }
+  }
+}
+::-webkit-input-placeholder {
+  color: #192B53; 
+  font-family: "楷体";
+  text-align: center;
 }
 </style>

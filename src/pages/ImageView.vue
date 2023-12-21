@@ -29,7 +29,6 @@ const getImageList = async () => {
     imageList.value = result.data;
     total.value = imageList.value.length;
     getImageDetail(imageList.value[page.value - 1]._key);
-    imageOcrResult(imageList.value[page.value - 1].serialNumber);
   }else{
     createMsg(result.msg);
   }
@@ -47,6 +46,7 @@ const getImageDetail = async (iKey) => {
   loading.close();
   if(result.status == 200){
     imageDetail.value = baseURL+'/nbyz'+result.data;
+    isText.value == 1 ? imageOcrResult(imageList.value[page.value - 1].serialNumber) : null;
   }else{
     createMsg(result.msg);
   }
@@ -104,6 +104,18 @@ const imageOcrResult = async (serialNumber) => {
   loading.close();
   if(result.status == 200){
     textAllList.value = result.data;
+    analysisList.value.forEach((ele) => {
+      if(serialNumber >= ele.startSerialNumber && serialNumber <= ele.endSerialNumber){
+        analysis.value = ele.title;
+      }
+      if(ele.children && ele.children.length){
+        ele.children.forEach((e) => {
+          if(serialNumber >= e.startSerialNumber && serialNumber <= e.endSerialNumber){
+            analysis.value = e.title;
+          }
+        });
+      }
+    });
   }else{
     createMsg(result.msg);
   }
@@ -121,7 +133,13 @@ const imageSearchSingleGC = async (content) => {
   });
   loading.close();
   if(result.status == 200){
-    textList.value = result.data;
+    textList.value = result.data.map((ele, index) => {
+      if(index === 0){
+        textAll.value = ele.content;
+        textKey.value = ele.content+'-'+ele.volumeNumber+'-'+ele.pageNumber+'页';
+      }
+      return ele;
+    });
   }else{
     createMsg(result.msg);
   }
@@ -141,12 +159,12 @@ const goBack = () => {
   router.push('/GenealogyDetail?id='+dataKey.value);
 }
 
-const analysis = ref('1');
+const analysis = ref('');
 const analysisList = ref([]);
 
 const vertical = ref(false);
 const keyWord = ref('');
-const text = ref('');
+const textKey = ref('');
 const textList = ref([]);
 const textAll = ref('');
 const textAllList = ref([]);
@@ -161,11 +179,11 @@ const handleSearch = () => {
 const changePage = (t) => {
   if(t === 'prev'){
     if(page.value >= 2){
-      page.value = page.value - 1;
+      currentPage.value = page.value = page.value - 1;
     }
   }else if(t === 'next'){
     if(page.value < total.value){
-      page.value = page.value + 1;
+      currentPage.value = page.value = page.value + 1;
     }
   }
 }
@@ -190,6 +208,7 @@ const handleClickText = (data) => {
     }else{
       textAll.value = data.content;
       page.value = currentPage.value = data.pageNumber;
+      textKey.value = data.content+'-'+data.volumeNumber+'-'+data.pageNumber+'页';
     }
   }else{
 
@@ -200,7 +219,6 @@ watch(page, (nv, ov) => {
   console.log(nv);
   // textAll.value = '';
   getImageDetail(imageList.value[page.value - 1]._key);
-  imageOcrResult(imageList.value[page.value - 1].serialNumber);
 });
 
 watch(volumeKey, (nv, ov) => {
@@ -215,8 +233,10 @@ onMounted(() => {
     page.value = Number(getQueryVariable('page'));
     currentPage.value = page.value;
     isText.value = getQueryVariable('isText');
+    keyWord.value = getQueryVariable('content') ? decodeURIComponent(getQueryVariable('content')) : '';
     getVolumeList();
-    getCatalogAnalysisResult();
+    isText.value == 1 ? getCatalogAnalysisResult() : null;
+    keyWord.value ? handleSearch() : null;
 });
 
 </script>
@@ -258,7 +278,7 @@ onMounted(() => {
           <div class="search-box">
             <el-input class="search" v-model="keyWord" placeholder="请输入关键字" @change="handleSearch" clearable />
             <ul class="textList style1" v-if="textList.length">
-              <li v-for="(item, index) in textList" :key="index" @click="handleClickText(item)">{{item.content}}-{{item.volumeNumber}}-{{item.pageNumber}}页</li>
+              <li v-for="(item, index) in textList" :class="{active: textKey == (item.content+'-'+item.volumeNumber+'-'+item.pageNumber+'页')}" :key="index" :title="item.content+'-'+item.volumeNumber+'-'+item.pageNumber+'页'" @click="handleClickText(item)">{{item.content}}-{{item.volumeNumber}}-{{item.pageNumber}}页</li>
             </ul>
           </div>
           <div class="text-wrap style1" :class="{active: vertical}">
@@ -374,6 +394,7 @@ onMounted(() => {
       }
       .image{
         height: 100%;
+        min-height: 300px;
       }
     }
     .article{
@@ -403,7 +424,13 @@ onMounted(() => {
             height: 30px;
             line-height: 30px;
             cursor: pointer;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
             &:hover{
+              color: #7C4F11;
+            }
+            &.active{
               color: #7C4F11;
             }
           }
@@ -422,6 +449,8 @@ onMounted(() => {
         p{
           cursor: pointer;
           margin-top: 10px;
+          display: inline-block;
+          margin-right: 10px;
           &:hover{
             color: #7C4F11;
           }
