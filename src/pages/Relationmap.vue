@@ -6,6 +6,8 @@ import { useGlobalStore } from '../store/global.js';
 import { catalog } from '../util/api';
 import { getQueryVariable, createMsg } from '../util/ADS';
 import { ElLoading } from 'element-plus';
+import boy from '../assets/boy.png';
+import girl from '../assets/girl.svg';
 
 const router = useRouter();
 const global = useGlobalStore();
@@ -708,65 +710,127 @@ const zoomChartsData = {
 
 const netChart = ref();
 const initZoomCharts = (data) => {
-    netChart.value = new NetChart({
-        navigation: {
-            focusNodeExpansionRadius: 2,
-            initialNodes: [
-                "m-1"
-            ],
-            mode: "focusnodes"
-        },
-        style: {
-            node: {
-                display: "image",
-                lineWidth: 2,
-                lineColor: "#7C4F11",
-                imageCropping: true
-            },
-            "nodeStyleFunction": function(node) {
-                // console.log(node);
-                node.image = "https://zoomcharts.com/dvsl/data/net-chart/friend-net/"+node.id+".png";
-                node.label = node.data.name;
-            },
-            linkStyleFunction: function(link) {        
-                // console.log(link);                 
-                link.fillColor = "#7C4F11";  
-                link.label = link.data.type;                  
-                // link.labelStyle.textStyle.fillColor = '#000';
-                link.labelStyle.padding = 15;
-                // link.labelStyle.textStyle.font ='12px Arial';                 
-                link.labelStyle.backgroundStyle.fillColor = 'transparent';             
-                link.labelStyle.backgroundStyle.lineColor = 'transparent';
-                link.toDecoration = 'arrow';
-                link.labelStyle.rotateWithLink = true; //关系label方向顺着线条方向摆放                
-                if (link.hovered) {                       
-                    // link.radius = 2;  
-                    link.fillColor = "#7C4F11";                       
-                } else{
-                    // link.radius = 1;
-                } 
+   netChart.value = new NetChart({
+      navigation: {
+         focusNodeExpansionRadius: 2,
+         initialNodes: [
+            "m-1"
+         ],
+         mode: "focusnodes"
+      },
+      style: {
+         node: {
+            display: "image",
+            lineWidth: 2,
+            lineColor: "#7C4F11",
+            imageCropping: true
+         },
+         "nodeStyleFunction": function(node) {
+            nodeStyle(node);
+         },
+         linkStyleFunction: function(link) {        
+            // console.log(link);                 
+            link.fillColor = "#7C4F11";  
+            link.label = link.data.type;                  
+            link.labelStyle.textStyle.fillColor = '#7C4F11';
+            link.labelStyle.padding = 15;
+            // link.labelStyle.textStyle.font ='12px Arial';                 
+            link.labelStyle.backgroundStyle.fillColor = 'transparent';             
+            link.labelStyle.backgroundStyle.lineColor = 'transparent';
+            link.toDecoration = 'arrow';
+            link.labelStyle.rotateWithLink = true; //关系label方向顺着线条方向摆放                
+            if (link.hovered) {                       
+               // link.radius = 2;  
+               link.fillColor = "#7C4F11";                       
+            } else{
+               // link.radius = 1;
+            } 
+         }
+      },
+      container: "relationmap",
+      data: {
+         preloaded: data,
+         preloadNodeLinks: true,              
+      },
+      toolbar: {
+         fullscreen: true,
+         enabled: true
+      },
+      interaction: {
+         resizing: {
+               enabled: false
+         }
+      },
+      layout: {
+         nodeSpacing: 60,
+         mode: 'dynamic',      
+      },
+      nodeMenu: {
+            enabled: false,
+            // showData: false,               
+      },
+      interaction: {
+            // resizing: { enabled: false },
+            zooming: {
+               zoomExtent: [0.1, 2],
+               autoZoomExtent: [0.1, 1],
+               doubleClickZoom:null,//双击空白将触发按此值放大
+               autoZoomPositionElasticity:5
+            },                
+      },
+      events: {
+         onClick:function(event, args){
+            // console.log(event, args);
+            //当前点击的节点 
+            if(event.clickNode){   
+               console.log(event.clickNode.data);                                       
+               event.preventDefault();
             }
-        },
-        container: "relationmap",
-        data: {
-            preloaded: data,
-            preloadNodeLinks: true,              
-        },
-        toolbar: {
-            fullscreen: true,
-            enabled: true
-        },
-        interaction: {
-            resizing: {
-                enabled: false
+            //当前点击的关系
+            if(event.clickLink){       
+               event.preventDefault();
             }
-        },
-        layout: {
-            nodeSpacing: 60,
-            mode: 'dynamic',      
-        },
-    })
+         },        
+      },
+   })
 }
+
+const nodeStyle = (node) =>{ 
+   node.radius = 30;
+   node.lineColor = '#ff7963';
+   node.lineWidth = 2;  
+
+   if(node.focused){           
+      node.radius = 40;
+      node.lineWidth = 4;  
+   }
+
+   if(node.hovered){
+      node.radius = 35; 
+      node.fillColor = "#f7764d";  
+   } 
+
+   node.items = [];
+   node.display = "image";           
+   node.imageCropping = true;
+   node.label = node.data.name;
+   node.labelStyle.padding = 15;       
+   node.labelStyle.textStyle.fillColor = "#7C4F11";                 
+   node.labelStyle.backgroundStyle.fillColor = "transparent";    
+   
+   if(node.data.imageUrl){
+      node.image = node.data.imageUrl;
+   }else{
+      node.image = boy;
+   }
+     
+   if(node.focused && node.selected) {
+      node.label = node.data.name;
+   }
+
+   return node;
+}
+
 
 const dataKey = ref('');
 
@@ -793,7 +857,7 @@ onMounted(() => {
   position: relative;
   width: 100%;
   height: 100%;
-//   background-color: #333;
+  background-color: #333;
   overflow: hidden;
   .main{
     position: relative;
