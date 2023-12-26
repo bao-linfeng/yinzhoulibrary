@@ -153,8 +153,10 @@ const handleBatchUpdate = (response, uploadFile, uploadFiles) => {
   }
 }
 
-const handleClickInput = (row) => {
+const uploadType = ref('');
+const handleClickInput = (row, t) => {
   dataRow.value = row;
+  uploadType.value = t;
 }
 
 const handleInputChange = (e) => {
@@ -173,7 +175,8 @@ const handleInputChange = (e) => {
 const uploadJPGOrXML = async (fd) =>{
   const result = await uploadApi.uploadJPGOrXML(fd);
   if(result.status == 200){
-    catalogAnalysis(result.simplePath);
+    uploadType.value == 'project' ? catalogAnalysis(result.simplePath) : null;
+    uploadType.value == 'tree' ? catalogAnalysis(result.simplePath) : null;
   }else{
     ElMessage({
       message: result.msg,
@@ -276,8 +279,12 @@ onMounted(() => {
               </template>
             </el-popconfirm>
             <div class="upload-box">
-              <input type="file" id="fileInput" @click="handleClickInput(scope.row)" @change="handleInputChange" accept=".xml" />
+              <input type="file" id="fileInput" @click="handleClickInput(scope.row, 'project')" @change="handleInputChange" accept=".xml" />
               <label for="fileInput" class="label">目录解析</label>
+            </div>
+            <div class="upload-box">
+              <input type="file" id="tree" @click="handleClickInput(scope.row, 'tree')" @change="handleInputChange" accept=".xml" />
+              <label for="tree" class="label">节点解析</label>
             </div>
           </template>
         </el-table-column>

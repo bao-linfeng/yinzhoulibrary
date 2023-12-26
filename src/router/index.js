@@ -9,6 +9,7 @@ import GenealogyDetail from '../pages/GenealogyDetail.vue';
 import ImageView from '../pages/ImageView.vue';
 import GenealogyManage from '../pages/GenealogyManage.vue';
 import VolumeManage from '../pages/VolumeManage.vue';
+import Relationmap from '../pages/Relationmap.vue';
 
 const routes = [
   { path: '/', component: Home },
@@ -17,6 +18,7 @@ const routes = [
   { path: '/ImageView', component: ImageView },
   { path: '/GenealogyManage', component: GenealogyManage },
   { path: '/VolumeManage', component: VolumeManage },
+  { path: '/Relationmap', component: Relationmap },
 ];
 
 const router = createRouter({

@@ -47,7 +47,7 @@ onMounted(() => {
 <template>
     <aside class="aside">
         <header class="header">
-            <img class="logo" @click="goHome" src="/128.png" alt="">
+            <img class="logo" @click="goHome" src="/favicon.ico" alt="">
             <span class="name">{{userInfo.account}}</span>
             <p class="role">{{userInfo.right == 1 ? '管理员' : userInfo.right == 2 ? '编辑' : '成员'}}</p>
         </header>
@@ -78,7 +78,7 @@ onMounted(() => {
             height: 4rem;
             margin-bottom: 1rem;
             display: block;
-            margin: 0 auto;
+            margin: 5px auto;
             cursor: pointer;
         }
         .role{

@@ -38,7 +38,7 @@ onMounted(() => {
 
 <template>
     <header class="header">
-      <img class="logo" src="../assets/logo.png" @click="goRouter('/')" />
+      <!-- <img class="logo" src="../assets/logo.png" @click="goRouter('/')" /> -->
       <nav class="nav">
         <router-link to="/GenealogySearch">检索中心</router-link>
         <router-link v-if="token" class="marginL20" to="/GenealogyManage">管理中心</router-link>
@@ -50,11 +50,11 @@ onMounted(() => {
 
 <style scoped lang="scss">
 .header{
-    height: 160px;
+    height: 80px;
     margin: 0 auto;
     width: 1460px;
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
     align-items: center;
     color: #C9A470;
     .logo{

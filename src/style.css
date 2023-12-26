@@ -142,3 +142,8 @@ i{
   --el-color-primary-light-3: #C9A470 !important;
   --el-color-primary-dark-2: #C9A470 !important;
 }
+
+/* zoomcharts */
+.DVSL-font-height{
+  display: none !important;
+}

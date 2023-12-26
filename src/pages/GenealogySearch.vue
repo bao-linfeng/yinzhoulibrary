@@ -7,6 +7,8 @@ import { catalog } from '../util/api';
 import { ElLoading } from 'element-plus';
 import { getQueryVariable, createMsg } from '../util/ADS';
 import HeaderModule from '../components/HeaderModule.vue';
+import showIcon from '../assets/展开.svg';
+import hideIcon from '../assets/收起.svg';
 
 const router = useRouter();
 const global = useGlobalStore();
@@ -85,7 +87,7 @@ const SearchParameters = ref({
   'hasIndex': '',
 });
 const page = ref(1);
-const limit = ref(16);
+const limit = ref(12);
 const total = ref(0);
 const tableData = ref([]);
 const h = ref(200);
@@ -125,6 +127,7 @@ const listSurname = ref([]);
 const listPlace = ref([]);
 const listHall = ref([]);
 const listAuthors = ref([]);
+const statisticsToggle = ref([false, false, false, false]);
 const changeProperty = (p, v) =>{
   console.log(p, v);
   if(SearchParameters.value[p] === v){
@@ -136,8 +139,18 @@ const changeProperty = (p, v) =>{
   handleSearch();
 }
 
+const handleToggle = (i) => {
+  statisticsToggle.value = statisticsToggle.value.map((ele, index) => {
+    if(i === index){
+      ele = !ele;
+    }
+
+    return ele;
+  });
+}
+
 onMounted(() => {
-  h.value = 1050;
+  h.value = 1100;
   SearchParameters.value.surname = getQueryVariable('surname') ? decodeURIComponent(getQueryVariable('surname')) : '';
   handleSearch();
 });
@@ -147,6 +160,7 @@ onMounted(() => {
 <template>
   <section class="genealogy-search-wrap">
     <HeaderModule />
+    <img class="image-title" src="../assets/标题.svg" />
     <main class="main">
       <!-- search -->
       <section class="search-wrap">
@@ -178,13 +192,66 @@ onMounted(() => {
       <section class="tab-section">
         <h3 class="title">发现 {{total}} 部家谱</h3>
         <ul class="tab-ul">
-          <li :class="{active: tab === item.value}" v-for="(item, index) in tabList" :key="index" @click="tab = item.value">{{item.label}}</li>
+          <li :class="{active: tab === item.value}" v-for="(item, index) in tabList" :key="index" @click="tab = item.value">
+            <img v-if="index === 0" src="../assets/列表.svg" />
+            <img v-if="index === 1" src="../assets/图库.svg" />
+            <i>{{item.label}}</i>
+          </li>
         </ul>
       </section>
       <!-- data -->
       <section class="data-section">
+        <!-- 分面器 -->
+        <aside class="aside">
+          <div class="scroll-wrap">
+              <img class="left" src="../assets/scrollLeft.png" alt="">
+              <img class="right" src="../assets/scrollRight.png" alt="">
+          </div>
+          <div class="statistics">
+            <div class="box">
+              <div class="title-box">
+                <h3 class="title">姓氏</h3>
+                <img :src="!statisticsToggle[0] ? showIcon : hideIcon" @click="handleToggle(0)" />
+              </div>
+              <ul class="list-wrap style1" :class="{active: statisticsToggle[0]}">
+                  <li class="li" :class="{active: SearchParameters.surname == item.surname}" v-for="(item, index) in listSurname" :key="index" @click="changeProperty('surname', item.surname)">{{item.surname}}({{item.length}})</li>
+              </ul>
+            </div>
+            <div class="box">
+              <div class="title-box">
+                <h3 class="title">堂号</h3>
+                <img :src="!statisticsToggle[1] ? showIcon : hideIcon" @click="handleToggle(1)" />
+              </div>
+              <ul class="list-wrap style1" :class="{active: statisticsToggle[1]}">
+                  <li class="li" :class="{active: SearchParameters.hall == item.hall}" v-for="(item, index) in listHall" :key="index" @click="changeProperty('hall', item.hall)">{{item.hall}}({{item.length}})</li>
+              </ul>
+            </div>
+            <div class="box">
+              <div class="title-box">
+                <h3 class="title">作者</h3>
+                <img :src="!statisticsToggle[2] ? showIcon : hideIcon" @click="handleToggle(2)" />
+              </div>
+              <ul class="list-wrap style1" :class="{active: statisticsToggle[2]}">
+                  <li class="li" :class="{active: SearchParameters.authors == item.authors}" v-for="(item, index) in listAuthors" :key="index" @click="changeProperty('authors', item.authors)">{{item.authors}}({{item.length}})</li>
+              </ul>
+            </div>
+            <div class="box">
+              <div class="title-box">
+                <h3 class="title">谱籍地</h3>
+                <img :src="!statisticsToggle[3] ? showIcon : hideIcon" @click="handleToggle(3)" />
+              </div>
+              <ul class="list-wrap style1" :class="{active: statisticsToggle[3]}">
+                  <li class="li" :class="{active: SearchParameters.place == item.place}" v-for="(item, index) in listPlace" :key="index" @click="changeProperty('place', item.place)">{{item.place}}({{item.length}})</li>
+              </ul>
+            </div>
+            <div class="toggle-box">
+              <img src="../assets/收起.svg" />
+              <i>收起筛选</i>
+            </div>
+          </div>
+        </aside>
         <!-- 谱目列表 -->
-        <article class="article">
+        <article class="article marginL20">
           <div class="scroll-wrap">
               <img class="left" src="../assets/scrollLeft.png" alt="">
               <img class="right" src="../assets/scrollRight.png" alt="">
@@ -193,7 +260,7 @@ onMounted(() => {
             v-if="tab === 0"
             ref="jiapu"
             :data="tableData"  
-            :min-height="h"
+            :height="h"
             style="width: 100%">
             <el-table-column prop="_key" label="谱ID" width="120" align="center" />
             <el-table-column prop="genealogyName" label="谱名" min-width="120" align="center" />
@@ -236,49 +303,11 @@ onMounted(() => {
             />
           </div>
         </article>
-        <!-- 分面器 -->
-        <aside class="aside marginL20">
-          <div class="scroll-wrap">
-              <img class="left" src="../assets/scrollLeft.png" alt="">
-              <img class="right" src="../assets/scrollRight.png" alt="">
-          </div>
-          <div class="statistics">
-            <div class="box">
-              <h3 class="title">姓氏</h3>
-              <ul class="list-wrap style1">
-                  <li class="li" :class="{active: SearchParameters.surname == item.surname}" v-for="(item, index) in listSurname" :key="index" @click="changeProperty('surname', item.surname)">{{item.surname}}({{item.length}})</li>
-              </ul>
-            </div>
-            <div class="box">
-              <h3 class="title">堂号</h3>
-              <ul class="list-wrap style1">
-                  <li class="li" :class="{active: SearchParameters.hall == item.hall}" v-for="(item, index) in listHall" :key="index" @click="changeProperty('hall', item.hall)">{{item.hall}}({{item.length}})</li>
-              </ul>
-            </div>
-            <div class="box">
-              <h3 class="title">作者</h3>
-              <ul class="list-wrap style1">
-                  <li class="li" :class="{active: SearchParameters.authors == item.authors}" v-for="(item, index) in listAuthors" :key="index" @click="changeProperty('authors', item.authors)">{{item.authors}}({{item.length}})</li>
-              </ul>
-            </div>
-            <div class="box">
-              <h3 class="title">谱籍地</h3>
-              <ul class="list-wrap style1">
-                  <li class="li" :class="{active: SearchParameters.place == item.place}" v-for="(item, index) in listPlace" :key="index" @click="changeProperty('place', item.place)">{{item.place}}({{item.length}})</li>
-              </ul>
-            </div>
-          </div>
-        </aside>
       </section>
     </main>
-    <!-- <footer class="footer">
-      <div class="left">
-          
-      </div>
-      <div class="right">
-        
-      </div>
-    </footer> -->
+    <footer class="footer">
+      <img class="logo" src="../assets/logo.png" />
+    </footer>
   </section>
 </template>
 
@@ -290,6 +319,10 @@ onMounted(() => {
   background: #fffcf9 url('../assets/bg.png') 50% 0 no-repeat;
   background-size: 100% auto;
   color: #333;
+  .image-title{
+    display: block;
+    margin: 0 auto 34px auto;
+  }
   .main{
     width: 100%;
     padding-bottom: 30px;
@@ -310,26 +343,24 @@ onMounted(() => {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin: 85px 130px 50px 130px;
+      width: 1460px;
+      margin: 30px auto 10px auto;
       color: #7C4F11;
       font-family: 'kaiti';
+      font-size: 26px;
       .title{
-        font-size: 40px;
         font-weight: normal;
       }
       .tab-ul{
-        position: absolute;
-        top: 102px;
-        left: 0;
         font-size: 26px;
+        display: flex;
+        align-items: center;
         li{
           cursor: pointer;
-          width: 26px;
-          margin-bottom: 30px;
-          padding-left: 7px;
+          margin-left: 20px;
+          opacity: 0.5;
           &.active{
-            font-weight: bold;
-            border-left: 4px solid #7C4F11;
+            opacity: 1;
           }
         }
       }
@@ -337,7 +368,6 @@ onMounted(() => {
     .data-section{
       width: 1460px;
       margin: 0 auto;
-      // height: calc(100% - 341px);
       display: flex;
       .aside{
         position: relative;
@@ -370,16 +400,12 @@ onMounted(() => {
   .footer{
     width: calc(100% - 100px);
     padding: 0 50px;
-    height: 50px;
+    height: 60px;
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
-    .left{
-        
-    }
-    .right{
-      display: flex;
-      align-items: center;
+    .logo{
+      height: 36px;
     }
   }
 }
@@ -413,13 +439,22 @@ onMounted(() => {
   padding: 20px;
   font-size: 16px;
   .box{
-    height: 350px;
+    height: 260px;
     margin-top: 20px;
+    .title-box{
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      img{
+        cursor: pointer;
+        height: 14px;
+      }
+    }
   }
   .title{
     border-left: 3px solid #333;
     padding-left: 10px;
-    margin-bottom: 20px;
     height: 14px;
     line-height: 14px;
     font-size: 16px;
@@ -427,14 +462,29 @@ onMounted(() => {
   }
   .list-wrap{
     height: calc(100% - 34px);
-    overflow-y: auto;
+    overflow-y: hidden;
+    &.active{
+      overflow-y: auto;
+    }
     .li{
       text-indent: 14px;
       margin-bottom: 5px;
       cursor: pointer;
+      color: #999;
       &.active{
         color: #358acd;
       }
+    }
+  }
+  .toggle-box{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-size: 14px;
+    color: #999;
+    img{
+      margin-right: 5px;
     }
   }
 }
@@ -442,7 +492,7 @@ onMounted(() => {
 .catalog-wrap{
   position: relative;
   width: 100%;
-  height: 1470px;
+  height: 1100px;
   font-size: 20px;
   .catalog-box{
     position: relative;

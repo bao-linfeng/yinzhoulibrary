@@ -90,6 +90,8 @@ const getCatalogAnalysisResult = async () => {
   }
 };
 
+const OcrResultList = ref([]);
+
 const imageOcrResult = async (serialNumber) => {
   const loading = ElLoading.service({
     lock: true,
@@ -103,7 +105,32 @@ const imageOcrResult = async (serialNumber) => {
   });
   loading.close();
   if(result.status == 200){
-    textAllList.value = result.data;
+    let OcrResultO = {}, ocrArr = [];
+    textAllList.value = result.data.map((ele, index) => {
+      let styleArr = ele.style.split(';');
+      ele.rect = styleArr[0].split(',');
+      ele.top = (100*(ele.rect[1])/ele.height)+'%';
+      ele.left = (100*(ele.rect[0])/ele.width)+'%';
+      ele.fontSize = ((styleArr[1].split(','))[1]*imageH.value/ele.height)+'px';
+      // console.log(ele);
+      if(OcrResultO[ele.lid]){
+        OcrResultO[ele.lid].push(ele);
+      }else{
+        OcrResultO[ele.lid] = [ele];
+      }
+
+      return ele;
+    });
+
+    console.log(OcrResultO);
+    for(let key in OcrResultO){
+      ocrArr.push(OcrResultO[key]);
+    }
+
+    OcrResultList.value = ocrArr;
+
+    // console.log(OcrResultList.value);
+
     analysisList.value.forEach((ele) => {
       if(serialNumber >= ele.startSerialNumber && serialNumber <= ele.endSerialNumber){
         analysis.value = ele.title;
@@ -135,7 +162,7 @@ const imageSearchSingleGC = async (content) => {
   if(result.status == 200){
     textList.value = result.data.map((ele, index) => {
       if(index === 0){
-        textAll.value = ele.content;
+        textAll.value = ele.index;
         textKey.value = ele.content+'-'+ele.volumeNumber+'-'+ele.pageNumber+'页';
       }
       return ele;
@@ -162,7 +189,7 @@ const goBack = () => {
 const analysis = ref('');
 const analysisList = ref([]);
 
-const vertical = ref(false);
+const vertical = ref(true);
 const keyWord = ref('');
 const textKey = ref('');
 const textList = ref([]);
@@ -204,9 +231,9 @@ const handleInputChange = (e) => {
 const handleClickText = (data) => {
   if(data.vKey === volumeKey.value){
     if(data.pageNumber === page.value){
-      textAll.value = data.content;
+      textAll.value = data.index;
     }else{
-      textAll.value = data.content;
+      textAll.value = data.index;
       page.value = currentPage.value = data.pageNumber;
       textKey.value = data.content+'-'+data.volumeNumber+'-'+data.pageNumber+'页';
     }
@@ -226,17 +253,22 @@ watch(volumeKey, (nv, ov) => {
   getImageList();
 });
 
+const imageH = ref(1080);
+const imageOW = ref(1341);
+const imageOH = ref(1937);
+
 onMounted(() => {
-    dataKey.value = getQueryVariable('id');
-    genealogyName.value = getQueryVariable('genealogyName') ? decodeURIComponent(getQueryVariable('genealogyName')) : '';
-    volumeKey.value = getQueryVariable('volumeKey');
-    page.value = Number(getQueryVariable('page'));
-    currentPage.value = page.value;
-    isText.value = getQueryVariable('isText');
-    keyWord.value = getQueryVariable('content') ? decodeURIComponent(getQueryVariable('content')) : '';
-    getVolumeList();
-    isText.value == 1 ? getCatalogAnalysisResult() : null;
-    keyWord.value ? handleSearch() : null;
+  imageH.value = window.innerHeight - 60 - 60 - 60;
+  dataKey.value = getQueryVariable('id');
+  genealogyName.value = getQueryVariable('genealogyName') ? decodeURIComponent(getQueryVariable('genealogyName')) : '';
+  volumeKey.value = getQueryVariable('volumeKey');
+  page.value = Number(getQueryVariable('page'));
+  currentPage.value = page.value;
+  isText.value = getQueryVariable('isText');
+  keyWord.value = getQueryVariable('content') ? decodeURIComponent(getQueryVariable('content')) : '';
+  getVolumeList();
+  isText.value == 1 ? getCatalogAnalysisResult() : null;
+  keyWord.value ? handleSearch() : null;
 });
 
 </script>
@@ -271,7 +303,10 @@ onMounted(() => {
       <main class="main" :class="{active: isText != 1}">
         <!-- 图片 -->
         <div class="large-image" :class="{active: isText != 1}">
-          <img class="image" :src="imageDetail" />
+          <div class="large-box">
+            <img class="image" :src="imageDetail" />
+            <p class="text" :class="{active: textAll === item.index}" :style="{top: item.top, left: item.left, fontSize: item.fontSize}" v-for="(item, index) in textAllList" :key="index" @click="textAll = item.index">{{item.content}}</p>
+          </div>
         </div>
         <!-- 全文 -->
         <article class="article" v-if="isText == 1">
@@ -282,7 +317,9 @@ onMounted(() => {
             </ul>
           </div>
           <div class="text-wrap style1" :class="{active: vertical}">
-            <p :class="{active: textAll === item.content, vertical: vertical}" v-for="(item, index) in textAllList" :key="index" @click="textAll = item.content">{{item.content}}</p>
+            <div class="text-box" :class="{vertical: vertical}" v-for="(item, index) in OcrResultList" :key="index">
+              <i :class="{active: textAll === item2.index, vertical: vertical}" v-for="(item2, index2) in item" :key="index2+'text'" @click="textAll = item2.index">{{item2.content}}</i>
+            </div>
           </div>
         </article>
         <img v-if="page >= 2" class="prev" src="../assets/左翻.svg" @click="changePage('prev')" />
@@ -384,9 +421,15 @@ onMounted(() => {
       justify-content: center;
     }
     .large-image{
+      position: relative;
       height: calc(100% - 60px);
       padding: 30px;
       background-color: #fff;
+      .large-box{
+        position: relative;
+        height: 100%;
+        font-family: '宋体';
+      }
       &.active{
         height: 100%;
         background-color: transparent;
@@ -395,6 +438,19 @@ onMounted(() => {
       .image{
         height: 100%;
         min-height: 300px;
+      }
+      .text{
+        position: absolute;
+        color: transparent;
+        cursor: pointer;
+        writing-mode: vertical-lr;
+        vertical-align: top;
+        // opacity: 0;
+        border: 1px solid #7C4F11;
+        &.active{
+          // color: #f00;
+          border: 1px solid #f00;
+        }
       }
     }
     .article{
@@ -445,24 +501,33 @@ onMounted(() => {
           overflow-y: hidden;
           overflow-x: auto;
           display: flex;
+          flex-direction: row-reverse;
         }
-        p{
-          cursor: pointer;
+        .text-box{
           margin-top: 10px;
-          display: inline-block;
-          margin-right: 10px;
-          &:hover{
-            color: #7C4F11;
-          }
-          &.active{
-            color: #7C4F11;
-          }
           &.vertical{
-            margin: 10px 10px 0 0;
-            display: inline;
-            writing-mode: vertical-lr;
-            max-height: 100%;
-            vertical-align: top;
+            width: 20px;
+            margin-left: 8px;
+            letter-spacing: 3px;
+          }
+          i{
+            cursor: pointer;
+            display: inline-block;
+            margin-right: 10px;
+            &:hover{
+              color: #7C4F11;
+            }
+            &.active{
+              color: #7C4F11;
+            }
+            &.vertical{
+              margin-bottom: 10px;
+              display: inline;
+              writing-mode: vertical-lr;
+              max-height: 100%;
+              vertical-align: top;
+              
+            }
           }
         }
       }
